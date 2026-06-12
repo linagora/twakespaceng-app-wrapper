@@ -1,0 +1,58 @@
+{
+  "name": "Space NG",
+  "name_prefix": "Twake",
+  "slug": "twakespaceng",
+  "version": "1.0.0",
+  "type": "webapp",
+  "licence": "AGPL-3.0",
+  "icon": "assets/icon.svg",
+  "categories": ["productivity"],
+  "source": "https://github.com/linagora/twakespaceng-app-wrapper",
+  "editor": "Linagora",
+  "developer": {
+    "name": "Linagora",
+    "url": "https://twake.app"
+  },
+  "default_locale": "en",
+  "locales": {
+    "en": {
+      "name": "Space NG",
+      "short_description": "Twake Space next-gen demo",
+      "long_description": "A high-fidelity demo of the next-generation Twake Space (Sovereign Collaborative Space): feed, chat, files, tasks, calendar, mail and AI under a single tab bar. The demo is bundled inside the application."
+    },
+    "fr": {
+      "name": "Space NG",
+      "short_description": "Démo Twake Space nouvelle génération",
+      "long_description": "Maquette haute-fidélité d'un Espace Collaboratif Souverain (ECS) : fil, chat, fichiers, tâches, agenda, mail et IA sous une barre d'onglets unique. La maquette est embarquée dans l'application."
+    }
+  },
+  "routes": {
+    "/": {
+      "folder": "/",
+      "index": "index.html",
+      "public": false
+    }
+  },
+  "permissions": {
+    "apps": {
+      "description": "Required by the cozy-bar to display the icons of the apps",
+      "type": "io.cozy.apps",
+      "verbs": ["GET"]
+    },
+    "settings": {
+      "description": "Required by the cozy-bar and to read application flags",
+      "type": "io.cozy.settings",
+      "verbs": ["GET"]
+    },
+    "contacts": {
+      "description": "Required by the cozy-bar to display the avatar",
+      "type": "io.cozy.contacts",
+      "verbs": ["GET"]
+    },
+    "files": {
+      "description": "Required by the cozy-bar to get shortcuts",
+      "type": "io.cozy.files",
+      "verbs": ["GET"]
+    }
+  }
+}
