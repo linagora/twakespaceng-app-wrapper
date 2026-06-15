@@ -1,4 +1,4 @@
-# Twake Space NG app wrapper
+# Twake Space app wrapper
 
 A Twake Workplace "shell" web application that ships the **Twake Space NG**
 demo — a high-fidelity mockup of the next-generation Twake Space (feed, chat,
