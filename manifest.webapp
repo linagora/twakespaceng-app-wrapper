@@ -16,12 +16,12 @@
   "default_locale": "en",
   "locales": {
     "en": {
-      "name": "Space NG",
+      "name": "Space",
       "short_description": "Twake Space next-gen demo",
       "long_description": "A high-fidelity demo of the next-generation Twake Space (Sovereign Collaborative Space): feed, chat, files, tasks, calendar, mail and AI under a single tab bar. The demo is bundled inside the application."
     },
     "fr": {
-      "name": "Space NG",
+      "name": "Space",
       "short_description": "Démo Twake Space nouvelle génération",
       "long_description": "Maquette haute-fidélité d'un Espace Collaboratif Souverain (ECS) : fil, chat, fichiers, tâches, agenda, mail et IA sous une barre d'onglets unique. La maquette est embarquée dans l'application."
     }
