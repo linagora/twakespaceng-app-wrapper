@@ -65,8 +65,10 @@
   });
 
   // Liens internes du Fil vers un onglet (ex. #général → Discussions)
-  $$("[data-tab-link]").forEach((el) => {
-    el.addEventListener("click", (e) => { e.preventDefault(); activateTab(el.dataset.tabLink); });
+  // Liens inter-vues (carte / accueil → onglet) — délégué (couvre le contenu rendu)
+  document.addEventListener("click", (e) => {
+    const el = e.target.closest("[data-tab-link]");
+    if (el) { e.preventDefault(); activateTab(el.dataset.tabLink); }
   });
 
   /* ---------------------------------------------------------------------------
@@ -277,6 +279,7 @@
     openName = name;
     const focusable = ov.querySelector("input, button, select, textarea, [tabindex]");
     if (focusable) focusable.focus();
+    if (name === "members") ensureMemberSelected();
   }
   function closeOverlay() {
     if (!openName) return;
@@ -329,12 +332,28 @@
     b.addEventListener("click", () => {
       $$("[data-seg]", b.parentNode).forEach((x) => x.classList.remove("is-active"));
       b.classList.add("is-active");
+      // Préréglage d'apps selon le type d'espace (C4)
+      if (b.dataset.preset) {
+        const on = b.dataset.preset.split(",");
+        $$("[data-create-app]").forEach((cb) => { cb.checked = on.indexOf(cb.dataset.createApp) !== -1; });
+      }
+    });
+  });
+  // Choix de couleur dans la modale de création (n'affecte pas l'espace courant) — C4
+  $$("[data-create-color]").forEach((sw) => {
+    sw.addEventListener("click", () => {
+      $$("[data-create-color]", sw.parentNode).forEach((x) => x.classList.remove("is-active"));
+      sw.classList.add("is-active");
     });
   });
   const createBtn = $('[data-action="create-space-confirm"]');
   if (createBtn) createBtn.addEventListener("click", () => {
+    const nameInput = $('[data-input="new-space-name"]');
+    const nm = nameInput && nameInput.value.trim() ? nameInput.value.trim() : "Nouvel espace";
+    const apps = $$("[data-create-app]").filter((cb) => cb.checked).length;
     closeOverlay();
-    toast("Espace créé", "Votre nouvel espace a été créé (simulation).", "i-plus");
+    toast("Espace créé", "« " + nm + " » créé avec " + apps + " app" + (apps > 1 ? "s" : "") + " activée" + (apps > 1 ? "s" : "") + " (simulation).", "i-plus");
+    announce("Espace " + nm + " créé");
   });
 
   /* ---------------------------------------------------------------------------
@@ -377,12 +396,83 @@
   if (inviteBtn) inviteBtn.addEventListener("click", inviteMember);
   if (inviteInput) inviteInput.addEventListener("keydown", (e) => { if (e.key === "Enter") { e.preventDefault(); inviteMember(); } });
 
-  // Toggles génériques (droits par ressource, préférences d'alerte)
-  $$("[data-toggle]").forEach((t) => {
-    t.addEventListener("click", () => {
-      const on = t.classList.toggle("is-on");
-      t.setAttribute("aria-pressed", on ? "true" : "false");
-    });
+  // Toggles génériques (droits, préférences, apps d'espace) — DÉLÉGATION pour
+  // couvrir aussi les toggles rendus dynamiquement (droits par membre, C3).
+  document.addEventListener("click", (e) => {
+    const t = e.target.closest("[data-toggle]");
+    if (!t) return;
+    const on = t.classList.toggle("is-on");
+    t.setAttribute("aria-pressed", on ? "true" : "false");
+  });
+
+  /* Droits par membre (C3) — deux niveaux :
+     • espace : quelles apps sont activées (data-space-app, ci-dessus en HTML) ;
+     • membre : Lecture/Écriture/Partage par app, défauts dérivés du rôle. */
+  const RIGHTS_APPS = [
+    { key: "chat", label: "Discussions", icon: "i-chat" },
+    { key: "files", label: "Fichiers", icon: "i-folder" },
+    { key: "tasks", label: "Tâches", icon: "i-check-square" },
+    { key: "agenda", label: "Agenda", icon: "i-calendar" }
+  ];
+  const ROLE_RIGHTS = {
+    "Owner":          { read: true, write: true, share: true },
+    "Administrateur": { read: true, write: true, share: true },
+    "Contributeur":   { read: true, write: true, share: false },
+    "Lecteur":        { read: true, write: false, share: false }
+  };
+  const spaceApps = { feed: true, chat: true, files: true, tasks: true, agenda: true, mail: true };
+  let selectedMember = null;
+  const memberRightsPanel = $("[data-member-rights]");
+
+  function renderMemberRights() {
+    if (!memberRightsPanel) return;
+    if (!selectedMember) {
+      memberRightsPanel.innerHTML = '<p class="rights-empty muted small">Sélectionnez un membre ci-dessus pour régler ses droits, application par application.</p>';
+      return;
+    }
+    const r = ROLE_RIGHTS[selectedMember.role] || ROLE_RIGHTS.Contributeur;
+    const apps = RIGHTS_APPS.filter((a) => spaceApps[a.key]);
+    function tog(on, lbl, app) {
+      return '<button class="toggle' + (on ? " is-on" : "") + '" data-toggle aria-pressed="' + (on ? "true" : "false") + '" aria-label="' + lbl + " " + app + " pour " + selectedMember.name + '"></button>';
+    }
+    const rows = apps.map((a) =>
+      '<div class="rights-row"><span class="rights-res">' + iconSvg(a.icon) + " " + a.label + "</span>" + tog(r.read, "Lecture", a.label) + tog(r.write, "Écriture", a.label) + tog(r.share, "Partage", a.label) + "</div>"
+    ).join("") || '<p class="rights-empty muted small">Aucune app activée dans l\'espace.</p>';
+    memberRightsPanel.innerHTML =
+      '<p class="field-label">Droits de ' + selectedMember.name + ' <span class="muted small">— ajustables à tout moment</span></p>' +
+      '<div class="rights-table"><div class="rights-row rights-row--head"><span>Application</span><span>Lecture</span><span>Écriture</span><span>Partage</span></div>' + rows + "</div>";
+  }
+  function selectMember(el) {
+    selectedMember = { name: el.dataset.member, role: el.dataset.role || "Contributeur" };
+    $$(".member").forEach((m) => m.classList.toggle("is-selected", m === el));
+    renderMemberRights();
+  }
+  function ensureMemberSelected() {
+    const members = $$(".member[data-member]");
+    if (!members.length) { selectedMember = null; renderMemberRights(); return; }
+    const found = selectedMember && members.filter((m) => m.dataset.member === selectedMember.name)[0];
+    selectMember(found || members[0]);
+  }
+  // Sélection d'un membre (clic sur la ligne, hors menu de rôle)
+  document.addEventListener("click", (e) => {
+    const m = e.target.closest("[data-member]");
+    if (m && !e.target.closest("select")) selectMember(m);
+  });
+  // Changement de rôle → recalcule les droits si ce membre est sélectionné
+  document.addEventListener("change", (e) => {
+    const sel = e.target.closest(".select--role");
+    if (!sel) return;
+    const m = sel.closest("[data-member]");
+    if (!m) return;
+    m.dataset.role = sel.value;
+    if (selectedMember && selectedMember.name === m.dataset.member) { selectedMember.role = sel.value; renderMemberRights(); }
+  });
+  // Activer/désactiver une app au niveau espace → met à jour les droits affichés
+  document.addEventListener("click", (e) => {
+    const t = e.target.closest("[data-space-app]");
+    if (!t) return;
+    spaceApps[t.dataset.spaceApp] = t.classList.contains("is-on");
+    renderMemberRights();
   });
 
   /* ---------------------------------------------------------------------------
@@ -493,6 +583,31 @@
       verBtn.setAttribute("aria-expanded", open ? "true" : "false");
       verBtn.innerHTML = iconSvg("i-history") + (open ? " Masquer l'historique" : " Voir l'historique des versions");
     }
+  });
+
+  // C5 — menu d'actions par fichier (…) + actions simulées + dossiers
+  function closeRowMenus() { $$(".file-menu").forEach((d) => { d.hidden = true; }); }
+  document.addEventListener("click", (e) => {
+    const btn = e.target.closest("[data-row-menu]");
+    if (btn) {
+      e.stopPropagation();
+      const dd = btn.parentNode.querySelector(".file-menu");
+      const willOpen = dd && dd.hidden;
+      closeRowMenus();
+      if (dd && willOpen) dd.hidden = false;
+      return;
+    }
+    closeRowMenus();
+  });
+  document.addEventListener("click", (e) => {
+    const it = e.target.closest("[data-fileaction]");
+    if (it) toast(it.dataset.fileaction, "Action simulée sur le document (maquette).", "i-folder");
+  });
+  document.addEventListener("click", (e) => {
+    const f = e.target.closest(".files-folder");
+    if (!f) return;
+    $$(".files-folder", f.parentNode).forEach((x) => x.classList.remove("is-active"));
+    f.classList.add("is-active");
   });
 
   // Badge « v3 » → ouvre directement la fiche + l'historique
@@ -685,6 +800,35 @@
   // Petit retour visuel sur quelques actions « live » de démonstration
   $$('.icon-btn[aria-label="Démarrer une visio"], .ocard-cta').forEach((b) =>
     b.addEventListener("click", () => toast("Twake Visio Meeting", "Démarrage de la réunion (simulation).", "i-video")));
+  // Appels/visio par canal (C7) — délégué (re-rendu safe)
+  document.addEventListener("click", (e) => {
+    if (e.target.closest('[data-action="channel-call"]')) toast("Appel audio", "Appel du canal démarré (simulation).", "i-phone");
+    else if (e.target.closest('[data-action="channel-video"]')) toast("Twake Visio Meeting", "Visio du canal démarrée (simulation).", "i-video");
+  });
+
+  // Publier une actualité dans le Fil (C8)
+  function publishFeedPost() {
+    const input = $('[data-input="feed-post"]');
+    if (!input) return;
+    const txt = input.value.trim();
+    if (!txt) { input.focus(); return; }
+    const list = $('.panel[data-panel="feed"] .feed-list');
+    if (list) {
+      const li = document.createElement("li");
+      li.className = "feed-item";
+      li.setAttribute("data-searchable", norm("actualité camille laurent " + txt));
+      li.innerHTML = '<span class="feed-bullet feed-bullet--msg" aria-hidden="true">' + iconSvg("i-edit") + '</span><div class="feed-body"><p class="feed-line"><strong>Camille Laurent</strong> a publié une actualité <span class="feed-when">· à l\'instant</span></p><blockquote class="feed-quote"></blockquote></div>';
+      $(".feed-quote", li).textContent = "« " + txt + " »";
+      list.insertBefore(li, list.firstChild);
+    }
+    input.value = "";
+    toast("Actualité publiée", "Votre actualité a été ajoutée au fil (simulation).", "i-edit");
+    announce("Actualité publiée dans le fil");
+  }
+  document.addEventListener("click", (e) => { if (e.target.closest('[data-action="feed-post"]')) publishFeedPost(); });
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Enter" && e.target.closest('[data-input="feed-post"]')) { e.preventDefault(); publishFeedPost(); }
+  });
 
   /* ---------------------------------------------------------------------------
      14b. ESPACES — modèle de données + rendu à la volée (bascule de contenu)
@@ -700,10 +844,11 @@
 
   // --- Données fictives des 4 autres espaces ---------------------------------
   const SPACES = {
-    b2b: { name: "B2B Admin Panel", tint: "grad", accent: "--primaryColor", members: 7, chatCount: 5, agendaCount: 2, static: true },
+    b2b: { name: "B2B Admin Panel", tint: "grad", accent: "--primaryColor", members: 7, chatCount: 5, agendaCount: 2, static: true, type: "Projet", pinned: true, since: "il y a 12 min", desc: "Refonte et administration du portail d'administration B2B (comptes clients, droits et facturation)." },
 
     modsi: {
       name: "Modernisation du SI", tint: "teal", accent: "--infoColor", members: 6, chatCount: 4, agendaCount: 3,
+      type: "Projet", pinned: true, since: "il y a 20 min", desc: "Migration vers le cloud souverain et modernisation des applications métier.",
       membersList: [
         { n: "Marc Lefèvre", i: "ML", c: "primary", role: "Owner" },
         { n: "Hugo Petit", i: "HP", c: "green", role: "Administrateur" },
@@ -752,6 +897,7 @@
 
     equip: {
       name: "Équipements utilisateurs", tint: "amber", accent: "--warningColor", members: 5, chatCount: 3, agendaCount: 2,
+      type: "Service", pinned: false, since: "il y a 35 min", desc: "Gestion du parc et renouvellement des équipements des utilisateurs.",
       membersList: [
         { n: "Sophie Dubois", i: "SD", c: "violet", role: "Owner" },
         { n: "Lucas Bernard", i: "LB", c: "amber", role: "Administrateur" },
@@ -797,6 +943,7 @@
 
     cyber: {
       name: "Cybersécurité", tint: "violet", accent: "--roleBadgeText", members: 6, chatCount: 3, agendaCount: 2,
+      type: "Thématique", pinned: false, since: "il y a 25 min", desc: "Sécurité, conformité (ISO 27001, RGPD) et gestion des incidents cyber.",
       membersList: [
         { n: "Marc Lefèvre", i: "ML", c: "primary", role: "Owner" },
         { n: "Thomas Moreau", i: "TM", c: "teal", role: "Administrateur" },
@@ -843,6 +990,7 @@
 
     collab: {
       name: "Plateforme collaborative", tint: "green", accent: "--successColor", members: 7, chatCount: 4, agendaCount: 2,
+      type: "Groupe de travail", pinned: false, since: "il y a 15 min", desc: "Déploiement, formation et adoption de la plateforme collaborative Twake.",
       membersList: [
         { n: "Léa Rousseau", i: "LR", c: "green", role: "Owner" },
         { n: "Camille Laurent", i: "CL", c: "blue", role: "Administrateur" },
@@ -902,12 +1050,40 @@
     }
     return '<article class="ocard"><span class="ocard-accent"></span><span class="ocard-ico">' + iconSvg(c.kind === "task" ? "i-check-square" : "i-doc") + '</span><div class="ocard-main"><h4 class="ocard-title">' + c.title + '</h4><p class="ocard-meta">' + (c.meta || "") + '</p></div></article>';
   }
+  function renderHome(s) {
+    const total = s.tasks.length, done = s.tasks.filter((t) => t.status === "done").length, pct = total ? Math.round(done / total * 100) : 0;
+    const evCount = s.agenda.reduce((n, d) => n + d.events.length, 0);
+    const avatars = s.membersList.slice(0, 6).map((m) => avaSvg(m.i, m.c, m.n)).join("");
+    return '<div class="panel-inner home">' +
+      '<div class="home-hero"><span class="home-type">' + s.type + '</span><h3 class="home-title">Bienvenue dans ' + s.name + '</h3><p class="home-desc">' + s.desc + ' Cet espace regroupe le fil d\'activité, les discussions, les fichiers, les tâches et l\'agenda de l\'équipe.</p></div>' +
+      '<div class="home-stats">' +
+        '<div class="home-stat"><span class="home-stat-num">' + s.members + '</span><span class="home-stat-label">Membres</span></div>' +
+        '<div class="home-stat"><span class="home-stat-num">' + pct + ' %</span><span class="home-stat-label">Tâches terminées</span></div>' +
+        '<div class="home-stat"><span class="home-stat-num">' + s.files.length + '</span><span class="home-stat-label">Documents</span></div>' +
+        '<div class="home-stat"><span class="home-stat-num">' + evCount + '</span><span class="home-stat-label">Événements à venir</span></div>' +
+      '</div>' +
+      '<div class="home-grid">' +
+        '<section class="home-card"><h4 class="home-card-title">Accès rapides</h4><div class="home-links">' +
+          '<button class="home-link" data-tab-link="files">' + iconSvg("i-folder") + ' Fichiers de l\'espace</button>' +
+          '<button class="home-link" data-tab-link="tasks">' + iconSvg("i-check-square") + ' Tâches en cours</button>' +
+          '<button class="home-link" data-tab-link="agenda">' + iconSvg("i-calendar") + ' Agenda partagé</button>' +
+          '<button class="home-link" data-tab-link="chat">' + iconSvg("i-chat") + ' Discussions</button>' +
+        '</div></section>' +
+        '<section class="home-card"><h4 class="home-card-title">À propos de cet espace</h4><p class="home-about">Espace de travail dédié à « ' + s.name + ' ». Tout le contenu est conservé dans l\'ECS souverain et synchronisé avec le Drive partagé.</p><ul class="home-about-list">' +
+          '<li>' + iconSvg("i-folder") + " " + s.files.length + ' documents partagés, synchronisés avec le Drive.</li>' +
+          '<li>' + iconSvg("i-check-square") + " " + total + ' tâches suivies, ' + done + ' terminées.</li>' +
+          '<li>' + iconSvg("i-calendar") + ' Réunions et échéances dans l\'agenda partagé.</li>' +
+        '</ul></section>' +
+      '</div>' +
+      '<section class="home-card"><h4 class="home-card-title">Membres de l\'espace</h4><div class="home-members-row"><div class="home-avatars">' + avatars + '</div><button class="btn btn-secondary" data-open="members">' + iconSvg("i-users") + ' Gérer les membres</button></div></section>' +
+      '</div>';
+  }
   function renderFeed(s) {
     const items = s.feed.map((f) =>
       '<li class="feed-item" data-searchable="' + norm(f.who + " " + f.act + " " + (f.card ? f.card.title : "") + " " + (f.note || "") + " " + (f.quote || "")) + '"><span class="feed-bullet feed-bullet--' + f.type + '">' + iconSvg(FEED_ICON[f.type]) + '</span><div class="feed-body"><p class="feed-line"><strong>' + f.who + '</strong> ' + f.act + ' <span class="feed-when">· ' + f.when + '</span></p>' +
       (f.card ? ocardHtml(f.card) : "") + (f.quote ? '<blockquote class="feed-quote">' + f.quote + '</blockquote>' : "") + (f.note ? '<p class="muted small">' + f.note + '</p>' : "") + '</div></li>'
     ).join("");
-    return '<div class="panel-inner feed"><div class="section-head"><h3 class="section-title">Fil d\'actualité</h3><span class="muted">Toute l\'activité de l\'espace, agrégée en temps réel</span></div><ol class="feed-list" data-searchable-list>' + items + '</ol></div>';
+    return '<div class="panel-inner feed"><div class="section-head"><h3 class="section-title">Fil d\'actualité</h3><span class="muted">Toute l\'activité de l\'espace, agrégée en temps réel</span></div><div class="feed-composer">' + avaSvg("CL", "blue", "Camille Laurent") + '<input class="feed-composer-input" type="text" placeholder="Publier une actualité dans l\'espace…" aria-label="Publier une actualité" data-input="feed-post"><button class="btn btn-primary" data-action="feed-post">' + iconSvg("i-send") + ' Publier</button></div><ol class="feed-list" data-searchable-list>' + items + '</ol></div>';
   }
   function taskCardHtml(t) {
     return '<article class="task-card' + (t.status === "done" ? " task-card--done" : "") + '" data-task data-status="' + t.status + '" data-searchable="' + norm(t.title + " " + t.who) + '"><p class="task-title">' + t.title + '</p><div class="task-foot"><button class="chip-status chip-status--' + t.status + '" data-action="cycle-status" aria-label="Changer le statut : actuellement ' + SL[t.status] + '"><span class="chip-dot"></span> ' + SL[t.status] + '</button><span class="task-meta">' + (t.due ? iconSvg("i-clock") + " " + t.due + " " : "") + avaSvg(t.i, t.c, "Assigné à " + t.who, true) + '</span></div></article>';
@@ -923,12 +1099,48 @@
   }
   const BADGE_MAP = { version: "badge-version", warn: "badge-warn", lock: "badge-lock", ai: "badge-ai", sync: "badge-sync" };
   const BADGE_ICO = { version: "i-layers", warn: "i-globe", lock: "i-lock", ai: "i-sparkles" };
+  function fileMenuHtml(name, withDetail) {
+    const detailItem = withDetail
+      ? '<button class="dropdown-item" role="menuitem" data-action="toggle-file-detail">' + iconSvg("i-sparkles") + " Détails IA</button>"
+      : '<button class="dropdown-item" role="menuitem" data-fileaction="Détails IA">' + iconSvg("i-sparkles") + " Détails IA</button>";
+    return '<button class="icon-btn" data-row-menu aria-label="Actions sur ' + name + '" aria-haspopup="true">' + iconSvg("i-more-h") + "</button>" +
+      '<div class="dropdown file-menu" role="menu" hidden>' +
+        '<button class="dropdown-item" role="menuitem" data-fileaction="Renommer">' + iconSvg("i-edit") + " Renommer</button>" +
+        '<button class="dropdown-item" role="menuitem" data-fileaction="Partage">' + iconSvg("i-share") + " Partager</button>" +
+        '<button class="dropdown-item" role="menuitem" data-fileaction="Déplacement">' + iconSvg("i-folder") + " Déplacer</button>" +
+        detailItem +
+        '<button class="dropdown-item" role="menuitem" data-fileaction="Téléchargement">' + iconSvg("i-download") + " Télécharger</button>" +
+        '<div class="dropdown-sep"></div>' +
+        '<button class="dropdown-item dropdown-item--danger" role="menuitem" data-fileaction="Suppression">' + iconSvg("i-trash") + " Supprimer</button>" +
+      "</div>";
+  }
   function fileRowHtml(f) {
-    const badges = (f.badges || []).map((b) => '<span class="badge ' + (BADGE_MAP[b.type] || "badge-lock") + '">' + (BADGE_ICO[b.type] ? iconSvg(BADGE_ICO[b.type]) : "") + " " + b.text + '</span>').join(" ");
-    return '<li class="file-wrap" data-searchable="' + norm(f.name + " " + f.owner + " " + (f.kw || "")) + '"><div class="files-row"><span class="file-name">' + iconSvg("i-doc", "file-ico file-ico--" + f.ico) + '<span>' + f.name + (badges ? ' <span class="file-badges">' + badges + '</span>' : "") + '</span></span><span class="file-owner">' + avaSvg(f.oi, f.oc, f.owner, true) + " " + f.owner + '</span><span class="muted">' + f.date + '</span><span class="muted">' + f.size + '</span><span class="col-end"><button class="icon-btn" data-noop aria-label="Télécharger">' + iconSvg("i-download") + '</button></span></div></li>';
+    const mk = (b) => '<span class="badge ' + (BADGE_MAP[b.type] || "badge-lock") + '">' + (BADGE_ICO[b.type] ? iconSvg(BADGE_ICO[b.type]) : "") + " " + b.text + "</span>";
+    const nameBadges = (f.badges || []).filter((b) => b.type === "version" || b.type === "ai").map(mk).join(" ");
+    const statB = (f.badges || []).filter((b) => b.type === "warn" || b.type === "lock");
+    const statHtml = statB.length ? statB.map(mk).join(" ") : '<span class="status-ok">' + iconSvg("i-check") + " À jour</span>";
+    return '<li class="file-wrap" data-searchable="' + norm(f.name + " " + f.owner + " " + (f.kw || "")) + '"><div class="files-row" role="row">' +
+      '<span class="file-name" role="cell">' + iconSvg("i-doc", "file-ico file-ico--" + f.ico) + "<span>" + f.name + (nameBadges ? ' <span class="file-badges">' + nameBadges + "</span>" : "") + "</span></span>" +
+      '<span class="file-owner" role="cell">' + avaSvg(f.oi, f.oc, f.owner, true) + " " + f.owner + "</span>" +
+      '<span class="file-status" role="cell">' + statHtml + "</span>" +
+      '<span class="muted" role="cell">' + f.date + "</span>" +
+      '<span class="col-end file-actions" role="cell">' + fileMenuHtml(f.name, false) + "</span>" +
+      "</div></li>";
   }
   function renderFiles(s) {
-    return '<div class="panel-inner files"><nav class="breadcrumb" aria-label="Emplacement">' + iconSvg("i-folder") + ' <span>Espaces partagés</span> ' + iconSvg("i-chevron-right", "bc-sep") + ' <span>' + s.name + '</span> ' + iconSvg("i-chevron-right", "bc-sep") + ' <span class="bc-current">Documents</span> <span class="badge badge-sync">' + iconSvg("i-layers") + ' Synchronisé avec le Drive partagé</span></nav><div class="files-search"><div class="search search--inline">' + iconSvg("i-search", "search-icon") + '<input class="search-input" type="search" placeholder="Recherche plein texte dans les documents…" aria-label="Recherche plein texte" data-input="files-search"></div><span class="ai-tag">' + iconSvg("i-sparkles") + ' Recherche plein texte IA</span></div><p class="files-search-hint" data-files-hint hidden></p><div class="files-table" role="table" aria-label="Documents de l\'espace"><div class="files-row files-row--head" role="row"><span role="columnheader">Nom</span><span role="columnheader">Propriétaire</span><span role="columnheader">Modifié</span><span role="columnheader">Taille</span><span role="columnheader" class="col-end">Statut</span></div><ul class="files-body" data-searchable-list>' + s.files.map(fileRowHtml).join("") + '</ul></div></div>';
+    const nav = '<aside class="files-nav" aria-label="Dossiers"><p class="files-nav-label">Dossiers</p>' +
+      '<button class="files-folder is-active" data-folder>' + iconSvg("i-folder") + ' Documents <span class="files-folder-count">' + s.files.length + "</span></button>" +
+      '<button class="files-folder" data-folder>' + iconSvg("i-folder") + " Livrables</button>" +
+      '<button class="files-folder" data-folder>' + iconSvg("i-folder") + " Partagés à l'externe</button>" +
+      '<button class="files-folder" data-folder>' + iconSvg("i-archive") + " Archives</button></aside>";
+    return '<div class="panel-inner files">' +
+      '<div class="files-toolbar"><nav class="breadcrumb" aria-label="Emplacement">' + iconSvg("i-folder") + ' <span>Espaces partagés</span> ' + iconSvg("i-chevron-right", "bc-sep") + " <span>" + s.name + "</span> " + iconSvg("i-chevron-right", "bc-sep") + ' <span class="bc-current">Documents</span> <span class="badge badge-sync">' + iconSvg("i-layers") + ' Synchronisé avec le Drive partagé</span></nav>' +
+      '<div class="files-toolbar-actions"><button class="btn btn-secondary" data-fileaction="Import de fichiers">' + iconSvg("i-download") + ' Importer</button><button class="btn btn-primary" data-fileaction="Nouveau document">' + iconSvg("i-plus") + " Nouveau</button></div></div>" +
+      '<div class="files-layout">' + nav + '<div class="files-main">' +
+      '<div class="files-search"><div class="search search--inline">' + iconSvg("i-search", "search-icon") + '<input class="search-input" type="search" placeholder="Recherche plein texte dans les documents…" aria-label="Recherche plein texte" data-input="files-search"></div><span class="ai-tag">' + iconSvg("i-sparkles") + ' Recherche plein texte IA</span></div>' +
+      '<p class="files-search-hint" data-files-hint hidden></p>' +
+      '<div class="files-table" role="table" aria-label="Documents de l\'espace"><div class="files-row files-row--head" role="row"><span role="columnheader">Nom</span><span role="columnheader">Partagé par</span><span role="columnheader">Statut</span><span role="columnheader">Modifié</span><span role="columnheader" class="col-end">Actions</span></div><ul class="files-body" data-searchable-list>' + s.files.map(fileRowHtml).join("") + "</ul></div>" +
+      "</div></div></div>";
   }
   function renderAgenda(s) {
     const days = s.agenda.map((d) =>
@@ -941,7 +1153,14 @@
     const rows = s.mail.map((m) =>
       '<li class="mail-row' + (m.unread ? " mail-row--unread" : "") + '" data-searchable="' + norm(m.from + " " + m.subj) + '">' + avaSvg(m.i, m.c, m.from, true) + '<div class="mail-main"><p class="mail-from">' + m.from + (m.ext ? ' <span class="badge badge-ext">Externe</span>' : "") + '</p><p class="mail-subject">' + m.subj + '</p><p class="mail-preview muted">' + m.prev + '</p></div><span class="mail-time muted">' + m.time + '</span></li>'
     ).join("");
-    return '<div class="panel-inner mail"><div class="section-head"><h3 class="section-title">Mail de l\'espace</h3><span class="badge badge-sync">Vue allégée</span></div><ul class="mail-list" data-searchable-list>' + rows + '</ul></div>';
+    const unread = s.mail.filter((m) => m.unread).length;
+    const nav = '<aside class="files-nav" aria-label="Dossiers de mail"><button class="btn btn-primary btn-block mail-compose" data-fileaction="Nouveau message">' + iconSvg("i-edit") + ' Écrire un mail</button><p class="files-nav-label">Dossiers</p>' +
+      '<button class="files-folder is-active" data-folder>' + iconSvg("i-mail") + ' Réception <span class="files-folder-count">' + s.mail.length + '</span></button>' +
+      '<button class="files-folder" data-folder>' + iconSvg("i-bell") + ' Non lus' + (unread ? ' <span class="files-folder-count">' + unread + '</span>' : "") + '</button>' +
+      '<button class="files-folder" data-folder>' + iconSvg("i-send") + ' Envoyés</button>' +
+      '<button class="files-folder" data-folder>' + iconSvg("i-edit") + ' Brouillons</button>' +
+      '<button class="files-folder" data-folder>' + iconSvg("i-archive") + ' Archives</button></aside>';
+    return '<div class="panel-inner mail"><div class="files-layout">' + nav + '<div class="files-main"><div class="section-head"><h3 class="section-title">Réception — Mail de l\'espace</h3><span class="badge badge-sync">Vue filtrée sur l\'espace</span></div><ul class="mail-list" data-searchable-list>' + rows + '</ul></div></div></div>';
   }
   function renderChat(s) {
     const channels = s.channels.map((c) => '<button class="channel' + (c.active ? " is-active" : "") + '" data-channel="' + c.name + '"># ' + c.name + (c.n ? ' <span class="channel-badge' + (c.alert ? " channel-badge--alert" : "") + '">' + c.n + '</span>' : "") + '</button>').join("");
@@ -949,13 +1168,14 @@
     const msgs = s.messages.map((m) =>
       '<div class="msg">' + avaSvg(m.i, m.c, m.who) + '<div class="msg-body"><p class="msg-head"><span class="msg-name">' + m.who + '</span> ' + (m.role ? '<span class="badge badge-role">' + m.role + '</span> ' : "") + '<span class="msg-time">' + m.time + '</span></p><div class="bubble">' + m.text + '</div>' + (m.card ? '<article class="ocard ocard--inchat' + (m.card.kind === "event" ? " ocard--event" : "") + '">' + ocardHtml(m.card).replace(/^<article class="ocard[^"]*">/, "") : "") + '</div></div>'
     ).join("");
-    return '<div class="chat"><div class="channels" aria-label="Canaux"><p class="nav-section">Canaux</p>' + channels + '</div><div class="thread"><div class="thread-head"><h3 class="thread-title"># ' + first + '</h3><span class="muted small">Canal de l\'espace ' + s.name + ' · ' + s.members + ' membres</span></div><div class="messages" data-messages>' + msgs + '</div><form class="composer" data-composer><button type="button" class="icon-btn" data-action="link-object" aria-label="Lier un objet"><svg class="icon"><use href="#i-paperclip"></use></svg></button><input class="composer-input" type="text" placeholder="Envoyer un message à #' + first + '…" aria-label="Votre message" data-input="message"><button type="button" class="icon-btn" data-noop aria-label="Emoji"><svg class="icon"><use href="#i-smile"></use></svg></button><button type="submit" class="btn btn-primary composer-send" data-action="send" aria-label="Envoyer"><svg class="icon"><use href="#i-send"></use></svg></button></form></div></div>';
+    return '<div class="chat"><div class="channels" aria-label="Canaux"><p class="nav-section">Canaux</p>' + channels + '</div><div class="thread"><div class="thread-head"><div class="thread-head-text"><h3 class="thread-title"># ' + first + '</h3><span class="muted small">Canal de l\'espace ' + s.name + ' · ' + s.members + ' membres</span></div><div class="thread-actions"><button class="icon-btn" data-action="channel-call" aria-label="Appel audio du canal" title="Appel audio">' + iconSvg("i-phone") + '</button><button class="icon-btn" data-action="channel-video" aria-label="Visio du canal" title="Twake Visio Meeting">' + iconSvg("i-video") + '</button></div></div><div class="messages" data-messages>' + msgs + '</div><form class="composer" data-composer><button type="button" class="icon-btn" data-action="link-object" aria-label="Lier un objet"><svg class="icon"><use href="#i-paperclip"></use></svg></button><input class="composer-input" type="text" placeholder="Envoyer un message à #' + first + '…" aria-label="Votre message" data-input="message"><button type="button" class="icon-btn" data-noop aria-label="Emoji"><svg class="icon"><use href="#i-smile"></use></svg></button><button type="submit" class="btn btn-primary composer-send" data-action="send" aria-label="Envoyer"><svg class="icon"><use href="#i-send"></use></svg></button></form></div></div>';
   }
   function renderMembers(s) {
     return s.membersList.map((m) => {
-      const role = m.role === "Owner" ? '<span class="badge badge-role">Owner</span>' : '<select class="select select--role" aria-label="Rôle de ' + m.n + '" data-noop><option>' + m.role + '</option><option>Administrateur</option><option>Contributeur</option><option>Lecteur</option></select>';
+      const others = ["Administrateur", "Contributeur", "Lecteur"].filter((r) => r !== m.role).map((r) => "<option>" + r + "</option>").join("");
+      const role = m.role === "Owner" ? '<span class="badge badge-role">Owner</span>' : '<select class="select select--role" aria-label="Rôle de ' + m.n + '" data-noop><option>' + m.role + "</option>" + others + "</select>";
       const email = m.email || (norm(m.n).replace(/ /g, ".") + "@org.fr");
-      return '<div class="member">' + avaSvg(m.i, m.c, m.n) + '<div class="member-id"><p class="member-name">' + m.n + (m.ext ? ' <span class="badge badge-ext">Externe</span>' : "") + '</p><p class="muted small">' + email + '</p></div>' + role + '</div>';
+      return '<div class="member" data-member="' + m.n + '" data-role="' + m.role + '">' + avaSvg(m.i, m.c, m.n) + '<div class="member-id"><p class="member-name">' + m.n + (m.ext ? ' <span class="badge badge-ext">Externe</span>' : "") + '</p><p class="muted small">' + email + '</p></div>' + role + '</div>';
     }).join("");
   }
 
@@ -1021,6 +1241,7 @@
       Object.keys(PANEL_SNAP).forEach((p) => { const el = $('.panel[data-panel="' + p + '"]'); if (el) el.innerHTML = PANEL_SNAP[p]; });
       const ml = $("[data-members-list]"); if (ml) ml.innerHTML = MEMBERS_SNAP;
     } else {
+      $('.panel[data-panel="home"]').innerHTML = renderHome(s);
       $('.panel[data-panel="feed"]').innerHTML = renderFeed(s);
       $('.panel[data-panel="chat"]').innerHTML = renderChat(s);
       $('.panel[data-panel="files"]').innerHTML = renderFiles(s);
@@ -1032,10 +1253,99 @@
     const mb = $("#mb-title"); if (mb) mb.lastChild.textContent = " Membres · " + s.members;
     if (globalSearch) globalSearch.value = "";
     aiReset(s.name);
-    activateTab("feed");
+    showView("space");
+    activateTab("home");
     recomputeTasks();
     announce("Espace " + s.name + " ouvert");
   }
+
+  /* ---------------------------------------------------------------------------
+     14d. NAVIGATION GLOBALE — vues « Tous les espaces » & « Drive » (C1)
+     ------------------------------------------------------------------------ */
+  let currentView = "space";
+  const ALL_KEYS = ["b2b", "modsi", "equip", "cyber", "collab"];
+  const overviewGrid  = $("[data-overview-grid]");
+  const driveInner    = $("[data-drive-inner]");
+  const overviewPanel = $('[data-view-panel="overview"]');
+  const drivePanel    = $('[data-view-panel="drive"]');
+  const allSpacesBtn  = $(".nav-item--all");
+
+  function spaceCardHtml(key) {
+    const s = SPACES[key];
+    const pin = s.pinned ? iconSvg("i-pin-tack", "space-card-pin") : "";
+    return '<button class="space-card" data-space-card="' + key + '" aria-label="Ouvrir l\'espace ' + s.name + '">' +
+      '<span class="space-card-band space-card-band--' + s.tint + '" aria-hidden="true"></span>' +
+      '<span class="space-card-body"><span class="space-card-top">' +
+        '<span class="space-card-logo space-mini--' + s.tint + '" aria-hidden="true"></span>' +
+        '<span class="space-card-title">' + s.name + '</span>' + pin +
+      '</span><span class="space-card-type">' + s.type + '</span>' +
+      '<span class="space-card-desc">' + s.desc + '</span>' +
+      '<span class="space-card-foot">' +
+        '<span class="space-card-meta">' + iconSvg("i-users") + " " + s.members + ' membres</span>' +
+        '<span class="space-card-meta">' + iconSvg("i-clock") + " " + s.since + '</span>' +
+      '</span></span></button>';
+  }
+  function renderOverview() {
+    if (!overviewGrid) return;
+    overviewGrid.innerHTML = ALL_KEYS.map(spaceCardHtml).join("") +
+      '<button class="space-card space-card--new" data-open="create-space">' + iconSvg("i-plus") + ' Nouvel espace</button>';
+  }
+
+  const DRIVE_RECENT = [
+    { name: "Cahier des charges B2B v3.pdf", ico: "pdf", by: "Camille L.", bi: "CL", bc: "blue", space: "B2B Admin Panel", date: "11 juin", status: [{ t: "version", x: "v3" }, { t: "warn", x: "Diffusion restreinte" }] },
+    { name: "Schéma cible architecture cloud.pdf", ico: "pdf", by: "Hugo P.", bi: "HP", bc: "green", space: "Modernisation du SI", date: "13 juin", status: [{ t: "version", x: "v2" }] },
+    { name: "Catalogue matériel 2026.pdf", ico: "pdf", by: "Lucas B.", bi: "LB", bc: "amber", space: "Équipements utilisateurs", date: "11 juin", status: [{ t: "ai", x: "Rangé par IA" }] },
+    { name: "Rapport de test d'intrusion.pdf", ico: "pdf", by: "Nadia E.", bi: "NE", bc: "indigo", space: "Cybersécurité", date: "11 juin", status: [{ t: "lock", x: "Verrouillé" }] },
+    { name: "Guide d'adoption Twake.pdf", ico: "pdf", by: "Léa R.", bi: "LR", bc: "green", space: "Plateforme collaborative", date: "11 juin", status: [{ t: "version", x: "v3" }] }
+  ];
+  const DBADGE = { version: "badge-version", warn: "badge-warn", lock: "badge-lock", ai: "badge-ai" };
+  function driveStatus(arr) { return (arr || []).map((b) => '<span class="badge ' + (DBADGE[b.t] || "badge-lock") + '">' + b.x + "</span>").join(" "); }
+  function renderDrive() {
+    if (!driveInner) return;
+    const folders = ALL_KEYS.map((key) => {
+      const s = SPACES[key];
+      const n = s.files ? s.files.length : 5;
+      return '<button class="drive-folder" data-space-card="' + key + '" aria-label="Ouvrir les fichiers de ' + s.name + '"><span class="drive-folder-ico drive-folder-ico--' + s.tint + '">' + iconSvg("i-folder") + '</span><span><span class="drive-folder-name">' + s.name + '</span><span class="drive-folder-sub">' + n + ' documents</span></span></button>';
+    }).join("");
+    const rows = DRIVE_RECENT.map((f) =>
+      '<li class="file-wrap"><div class="files-row" role="row"><span class="file-name" role="cell">' + iconSvg("i-doc", "file-ico file-ico--" + f.ico) + '<span>' + f.name + '<span class="file-sub">' + f.space + '</span></span></span><span class="file-owner" role="cell">' + avaSvg(f.bi, f.bc, f.by, true) + " " + f.by + '</span><span role="cell" class="file-status">' + driveStatus(f.status) + '</span><span role="cell" class="muted">' + f.date + '</span><span class="col-end" role="cell"><button class="icon-btn" data-noop aria-label="Télécharger ' + f.name + '">' + iconSvg("i-download") + '</button></span></div></li>'
+    ).join("");
+    driveInner.innerHTML =
+      '<div class="section-head"><h2 class="section-title">Drive partagé</h2><span class="muted">Tous les fichiers des espaces dans un espace de stockage unique (ECS souverain).</span></div>' +
+      '<nav class="breadcrumb" aria-label="Emplacement">' + iconSvg("i-folder") + ' <span class="bc-current">Espaces partagés</span> <span class="badge badge-sync">' + iconSvg("i-layers") + ' Synchronisé — souverain</span></nav>' +
+      '<p class="drive-label field-label">Dossiers d\'espaces</p><div class="drive-folders">' + folders + '</div>' +
+      '<p class="drive-label field-label">Fichiers récents</p><div class="files-table" role="table" aria-label="Fichiers récents du Drive"><div class="files-row files-row--head" role="row"><span role="columnheader">Nom</span><span role="columnheader">Partagé par</span><span role="columnheader">Statut</span><span role="columnheader">Modifié</span><span role="columnheader" class="col-end">Action</span></div><ul class="files-body">' + rows + '</ul></div>';
+  }
+
+  function setRailActive(view) {
+    $$(".rail-app").forEach((b) => {
+      if (!b.dataset.view) return;
+      b.classList.toggle("is-active", view === "drive" ? b.dataset.view === "drive" : b.dataset.view === "overview");
+    });
+  }
+  function showView(view) {
+    currentView = view;
+    const isGlobal = view === "overview" || view === "drive";
+    app.classList.toggle("is-global", isGlobal);
+    if (overviewPanel) overviewPanel.hidden = view !== "overview";
+    if (drivePanel) drivePanel.hidden = view !== "drive";
+    if (view === "overview") { renderOverview(); announce("Vue Tous les espaces ouverte"); }
+    else if (view === "drive") { renderDrive(); announce("Drive partagé ouvert"); }
+    if (allSpacesBtn) allSpacesBtn.classList.toggle("is-current", view === "overview");
+    if (isGlobal) {
+      $$(".nav-space").forEach((n) => n.classList.remove("is-active"));
+      setAssistant(false);
+    }
+    setRailActive(view);
+  }
+
+  // Déclencheurs de vue (rail « Espaces »/« Drive » + item sidebar « Tous les espaces »)
+  $$("[data-view]").forEach((b) => b.addEventListener("click", () => showView(b.dataset.view)));
+  // Ouverture d'un espace depuis une carte (overview) ou un dossier (drive)
+  document.addEventListener("click", (e) => {
+    const card = e.target.closest("[data-space-card]");
+    if (card) selectSpace(card.dataset.spaceCard);
+  });
 
   /* ---------------------------------------------------------------------------
      14c. PRÉFÉRENCES UTILISATEUR (panneau sur l'avatar)
