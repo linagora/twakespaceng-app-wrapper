@@ -450,6 +450,15 @@ ul, ol { margin: 0; padding: 0; list-style: none; }
 .channel-badge { margin-left: auto; font-size: 11px; font-weight: var(--fw-bold); background: var(--spaceAccent); color: var(--paperBackgroundColor); padding: 0 7px; border-radius: var(--radius-pill); }
 .channel-badge--alert { background: var(--errorColor); }
 .channel--dm { gap: var(--space-xs); }
+/* V2d — recherche de canaux + création */
+.channels-search { position: relative; display: flex; align-items: center; margin-bottom: var(--space-xs); }
+.channels-search .search-icon { position: absolute; left: 10px; width: 15px; height: 15px; color: var(--secondaryTextColor); pointer-events: none; }
+.channels-search-input { width: 100%; padding: 7px 10px 7px 32px; border-radius: var(--radius-pill); border: 1px solid var(--borderColor); background: var(--paperBackgroundColor); color: var(--primaryTextColor); font-size: var(--fs-small); transition: border-color .15s, box-shadow .15s; }
+.channels-search-input:focus { outline: none; border-color: var(--spaceAccent); box-shadow: 0 0 0 3px var(--primaryColorLightest); }
+.channels-head { display: flex; align-items: center; justify-content: space-between; }
+.channels-add { width: 28px; height: 28px; }
+.channels-add .icon { width: 16px; height: 16px; }
+.channel[hidden] { display: none; }
 
 .thread { display: flex; flex-direction: column; min-height: 0; min-width: 0; background: var(--defaultBackgroundColor); }
 .thread-head { display: flex; align-items: center; justify-content: space-between; gap: var(--space-m); padding: var(--space-m) var(--space-l); border-bottom: 1px solid var(--borderColor); background: var(--paperBackgroundColor); }
@@ -598,6 +607,19 @@ ul, ol { margin: 0; padding: 0; list-style: none; }
 .file-menu { min-width: 212px; }
 .status-ok { display: inline-flex; align-items: center; gap: 4px; font-size: var(--fs-caption); font-weight: var(--fw-medium); color: var(--successColor); }
 .status-ok .icon { width: 13px; height: 13px; }
+/* V2e — zone Fichiers élargie, statut en icône+tooltip, remonter d'un niveau */
+.panel-inner.files { max-width: 1180px; }
+.file-status-ico { display: inline-flex; align-items: center; }
+.file-status-ico .icon { width: 18px; height: 18px; }
+.fs-signed .icon { color: var(--successColor); }
+.fs-tosign .icon { color: var(--warningColor); }
+.fs-restricted .icon { color: var(--warningColor); }
+.fs-locked .icon { color: var(--secondaryTextColor); }
+.files-nav-head { display: flex; align-items: center; justify-content: space-between; }
+.files-up { width: 28px; height: 28px; }
+.files-up .icon { width: 16px; height: 16px; }
+.breadcrumb .bc-link { cursor: pointer; transition: color .14s ease; }
+.breadcrumb .bc-link:hover { color: var(--spaceAccent); text-decoration: underline; }
 
 /* -----------------------------------------------------------------------------
    12. TÂCHES (E5)
@@ -781,6 +803,13 @@ button.chip-status:hover { border-color: var(--primaryColorLight); background: v
 .invite { background: var(--primaryBackgroundLight); border: 1px solid var(--primaryColorLight); border-radius: var(--radius); padding: var(--space-m); margin-bottom: var(--space-l); }
 .invite-row { display: flex; gap: var(--space-xs); margin-bottom: var(--space-xs); }
 .invite-row .input { flex: 1; }
+/* Note d'invitation : paragraphe simple (pas de flex → retour à la ligne propre) + tooltip (V2) */
+.invite-note { font-size: var(--fs-caption); color: var(--secondaryTextColor); margin-top: var(--space-xs); line-height: 1.5; }
+.invite-note .icon { width: 14px; height: 14px; color: var(--infoColor); vertical-align: -2px; }
+.invite-note-txt { margin-left: 2px; }
+.hint-btn { border: 0; background: transparent; padding: 0 2px; vertical-align: -3px; }
+.hint-btn .icon { width: 15px; height: 15px; color: var(--secondaryTextColor); transition: color .14s ease; }
+.hint-btn:hover .icon { color: var(--spaceAccent); }
 .member { display: flex; align-items: center; gap: var(--space-s); padding: var(--space-s) 0; border-bottom: 1px solid var(--borderColor); }
 .member:last-child { border-bottom: 0; }
 .member-id { flex: 1; min-width: 0; }

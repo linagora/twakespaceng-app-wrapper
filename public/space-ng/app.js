@@ -537,7 +537,7 @@
   }, 5200);
   setTimeout(function () {
     pushNotification({ type: "mention", icon: "i-at", title: "Nouvelle mention",
-      text: "Sophie Dubois vous a mentionné dans #projet-b2b." });
+      text: "Sophie Dubois vous a mentionné dans #projet-workplace." });
   }, 12000);
 
   /* ---------------------------------------------------------------------------
@@ -609,6 +609,10 @@
     $$(".files-folder", f.parentNode).forEach((x) => x.classList.remove("is-active"));
     f.classList.add("is-active");
   });
+  // Remonter d'un niveau dans l'arborescence (V2e)
+  document.addEventListener("click", (e) => {
+    if (e.target.closest('[data-action="folder-up"]')) toast("Dossier parent", "Remontée d'un niveau dans l'arborescence (simulation).", "i-folder");
+  });
 
   // Badge « v3 » → ouvre directement la fiche + l'historique
   function openFileVersions() {
@@ -635,7 +639,7 @@
     toast(title, msg, "i-sparkles");
   }
   document.addEventListener("click", (e) => {
-    if (e.target.closest('[data-action="ai-group-apply"]')) dismissAi("3 documents regroupés sous « Conception B2B ».", "Regroupement appliqué");
+    if (e.target.closest('[data-action="ai-group-apply"]')) dismissAi("3 documents regroupés sous « Conception Workplace ».", "Regroupement appliqué");
     else if (e.target.closest('[data-action="ai-group-dismiss"]')) dismissAi("Suggestion ignorée.", "Suggestion IA");
   });
 
@@ -683,8 +687,8 @@
 
   const B2B_AI = {
     resume:
-      "Voici l'activité récente de <strong>B2B Admin Panel</strong> :<ul>" +
-      "<li>Camille a ajouté <span class=\"ai-ref\">Cahier des charges B2B v3.pdf</span> (diffusion externe restreinte).</li>" +
+      "Voici l'activité récente de <strong>Workplace Souveraine</strong> :<ul>" +
+      "<li>Camille a ajouté <span class=\"ai-ref\">Cahier des charges Workplace v3.pdf</span> (diffusion externe restreinte).</li>" +
       "<li>Thomas a créé la tâche <span class=\"ai-ref\">Intégrer le SSO Keycloak</span> (en cours, échéance 18 juin).</li>" +
       "<li>Sophie a planifié le <span class=\"ai-ref\">Comité de pilotage</span> — aujourd'hui 14:00, Twake Visio Meeting.</li>" +
       "<li>Nadia El Amrani (externe) a rejoint l'espace.</li></ul>" +
@@ -697,9 +701,9 @@
       "La spécification API est la plus urgente. Voulez-vous que je prévienne Sophie&nbsp;?",
     search:
       "2 documents de l'espace correspondent (recherche plein texte) :<ul>" +
-      "<li>📄 <span class=\"ai-ref\">Cahier des charges B2B v3.pdf</span> — entités : RGPD, Keycloak, SSO.</li>" +
+      "<li>📄 <span class=\"ai-ref\">Cahier des charges Workplace v3.pdf</span> — entités : RGPD, Keycloak, SSO.</li>" +
       "<li>📄 <span class=\"ai-ref\">Specs techniques API.docx</span> (v5) — rangé par IA.</li></ul>" +
-      "Extrait : « …le traitement des données B2B doit être conforme au RGPD et journalisé… ».",
+      "Extrait : « …le traitement des données doit être conforme au RGPD et journalisé… ».",
     copil:
       "Projet de compte-rendu du <strong>Comité de pilotage</strong> :<ul>" +
       "<li><strong>Présents</strong> : Camille, Sophie, Thomas, Marc.</li>" +
@@ -806,6 +810,17 @@
     else if (e.target.closest('[data-action="channel-video"]')) toast("Twake Visio Meeting", "Visio du canal démarrée (simulation).", "i-video");
   });
 
+  // Recherche de canaux + création (V2d) — délégué (re-rendu safe)
+  document.addEventListener("input", (e) => {
+    const inp = e.target.closest('[data-input="channel-search"]');
+    if (!inp) return;
+    const q = norm(inp.value);
+    $$(".channels-list .channel").forEach((c) => { c.hidden = !!q && norm(c.dataset.chanName || c.textContent).indexOf(q) === -1; });
+  });
+  document.addEventListener("click", (e) => {
+    if (e.target.closest('[data-action="add-channel"]')) toast("Nouveau canal", "Création d'un canal / d'une discussion (simulation).", "i-chat");
+  });
+
   // Publier une actualité dans le Fil (C8)
   function publishFeedPost() {
     const input = $('[data-input="feed-post"]');
@@ -832,19 +847,19 @@
 
   /* ---------------------------------------------------------------------------
      14b. ESPACES — modèle de données + rendu à la volée (bascule de contenu)
-     B2B reste statique (vitrine E1–E12) ; les autres espaces sont rendus depuis
+     Workplace Souveraine reste statique (vitrine E1–E12) ; les autres espaces sont rendus depuis
      les données ci-dessous, chacun avec son accent propre. Re-rendu = sans réseau.
      ------------------------------------------------------------------------ */
   let currentSpaceKey = "b2b";
 
-  // Instantanés du contenu statique B2B (restaurés au retour sur B2B)
+  // Instantanés du contenu statique Workplace (restaurés au retour sur Workplace)
   const PANEL_SNAP = {};
   $$(".panel").forEach((p) => { PANEL_SNAP[p.dataset.panel] = p.innerHTML; });
   const MEMBERS_SNAP = $("[data-members-list]") ? $("[data-members-list]").innerHTML : "";
 
   // --- Données fictives des 4 autres espaces ---------------------------------
   const SPACES = {
-    b2b: { name: "B2B Admin Panel", tint: "grad", accent: "--primaryColor", members: 7, chatCount: 5, agendaCount: 2, static: true, type: "Projet", pinned: true, since: "il y a 12 min", desc: "Refonte et administration du portail d'administration B2B (comptes clients, droits et facturation)." },
+    b2b: { name: "Workplace Souveraine", tint: "grad", accent: "--primaryColor", members: 7, chatCount: 5, agendaCount: 2, static: true, type: "Projet", pinned: true, since: "il y a 12 min", desc: "Conception et déploiement du Workplace souverain de l'organisation (collaboration, fichiers, tâches, visio)." },
 
     modsi: {
       name: "Modernisation du SI", tint: "teal", accent: "--infoColor", members: 6, chatCount: 4, agendaCount: 3,
@@ -922,7 +937,7 @@
       files: [
         { name: "Catalogue matériel 2026.pdf", ico: "pdf", owner: "Lucas B.", oi: "LB", oc: "amber", date: "11 juin", size: "5,4 Mo", kw: "matériel postes", badges: [{ type: "version", text: "v4" }, { type: "ai", text: "Rangé par IA" }] },
         { name: "Inventaire parc.xlsx", ico: "xls", owner: "Emma L.", oi: "EL", oc: "green", date: "10 juin", size: "2,7 Mo", kw: "inventaire parc" },
-        { name: "Bon de commande Q2.pdf", ico: "pdf", owner: "Sophie D.", oi: "SD", oc: "violet", date: "8 juin", size: "180 Ko", kw: "commande fournisseur", badges: [{ type: "lock", text: "Modification verrouillée" }] },
+        { name: "Bon de commande Q2.pdf", ico: "pdf", owner: "Sophie D.", oi: "SD", oc: "violet", date: "8 juin", size: "180 Ko", kw: "commande fournisseur", status: "tosign" },
         { name: "Politique d'attribution.docx", ico: "doc", owner: "Aïcha D.", oi: "AD", oc: "indigo", date: "4 juin", size: "320 Ko", kw: "attribution règles" }
       ],
       agenda: [
@@ -1016,7 +1031,7 @@
       ],
       files: [
         { name: "Guide d'adoption Twake.pdf", ico: "pdf", owner: "Léa R.", oi: "LR", oc: "green", date: "11 juin", size: "6,1 Mo", kw: "adoption guide", badges: [{ type: "version", text: "v3" }, { type: "ai", text: "Rangé par IA" }] },
-        { name: "Charte d'usage.docx", ico: "doc", owner: "Sophie D.", oi: "SD", oc: "amber", date: "9 juin", size: "210 Ko", kw: "charte usage" },
+        { name: "Charte d'usage.docx", ico: "doc", owner: "Sophie D.", oi: "SD", oc: "amber", date: "9 juin", size: "210 Ko", kw: "charte usage", status: "signed" },
         { name: "Tableau de bord adoption.xlsx", ico: "xls", owner: "Théo M.", oi: "TM", oc: "indigo", date: "8 juin", size: "740 Ko", kw: "adoption métriques" },
         { name: "Kit de communication.pdf", ico: "pdf", owner: "Inès G.", oi: "IG", oc: "violet", date: "5 juin", size: "12 Mo", kw: "communication kit", badges: [{ type: "warn", text: "Diffusion externe restreinte" }] }
       ],
@@ -1114,27 +1129,37 @@
         '<button class="dropdown-item dropdown-item--danger" role="menuitem" data-fileaction="Suppression">' + iconSvg("i-trash") + " Supprimer</button>" +
       "</div>";
   }
+  const FILE_STATUS = {
+    signed:     { icon: "i-check", cls: "fs-signed",     label: "Signé" },
+    tosign:     { icon: "i-pen",   cls: "fs-tosign",     label: "À signer" },
+    restricted: { icon: "i-globe", cls: "fs-restricted", label: "Diffusion externe restreinte" },
+    locked:     { icon: "i-lock",  cls: "fs-locked",     label: "Modification verrouillée" }
+  };
+  function fileStatusHtml(st) {
+    const s = FILE_STATUS[st];
+    return s ? '<span class="file-status-ico ' + s.cls + '" title="' + s.label + '" aria-label="Statut : ' + s.label + '">' + iconSvg(s.icon) + "</span>" : "";
+  }
   function fileRowHtml(f) {
     const mk = (b) => '<span class="badge ' + (BADGE_MAP[b.type] || "badge-lock") + '">' + (BADGE_ICO[b.type] ? iconSvg(BADGE_ICO[b.type]) : "") + " " + b.text + "</span>";
     const nameBadges = (f.badges || []).filter((b) => b.type === "version" || b.type === "ai").map(mk).join(" ");
-    const statB = (f.badges || []).filter((b) => b.type === "warn" || b.type === "lock");
-    const statHtml = statB.length ? statB.map(mk).join(" ") : '<span class="status-ok">' + iconSvg("i-check") + " À jour</span>";
+    let st = f.status;
+    if (!st) { if ((f.badges || []).some((b) => b.type === "lock")) st = "locked"; else if ((f.badges || []).some((b) => b.type === "warn")) st = "restricted"; }
     return '<li class="file-wrap" data-searchable="' + norm(f.name + " " + f.owner + " " + (f.kw || "")) + '"><div class="files-row" role="row">' +
       '<span class="file-name" role="cell">' + iconSvg("i-doc", "file-ico file-ico--" + f.ico) + "<span>" + f.name + (nameBadges ? ' <span class="file-badges">' + nameBadges + "</span>" : "") + "</span></span>" +
-      '<span class="file-owner" role="cell">' + avaSvg(f.oi, f.oc, f.owner, true) + " " + f.owner + "</span>" +
-      '<span class="file-status" role="cell">' + statHtml + "</span>" +
+      '<span class="file-owner" role="cell" title="' + f.owner + '">' + avaSvg(f.oi, f.oc, f.owner, true) + "</span>" +
+      '<span class="file-status" role="cell">' + fileStatusHtml(st) + "</span>" +
       '<span class="muted" role="cell">' + f.date + "</span>" +
       '<span class="col-end file-actions" role="cell">' + fileMenuHtml(f.name, false) + "</span>" +
       "</div></li>";
   }
   function renderFiles(s) {
-    const nav = '<aside class="files-nav" aria-label="Dossiers"><p class="files-nav-label">Dossiers</p>' +
+    const nav = '<aside class="files-nav" aria-label="Dossiers"><div class="files-nav-head"><p class="files-nav-label">Dossiers</p><button class="icon-btn files-up" data-action="folder-up" title="Remonter d\'un niveau" aria-label="Remonter d\'un niveau">' + iconSvg("i-arrow-up") + '</button></div>' +
       '<button class="files-folder is-active" data-folder>' + iconSvg("i-folder") + ' Documents <span class="files-folder-count">' + s.files.length + "</span></button>" +
       '<button class="files-folder" data-folder>' + iconSvg("i-folder") + " Livrables</button>" +
       '<button class="files-folder" data-folder>' + iconSvg("i-folder") + " Partagés à l'externe</button>" +
       '<button class="files-folder" data-folder>' + iconSvg("i-archive") + " Archives</button></aside>";
     return '<div class="panel-inner files">' +
-      '<div class="files-toolbar"><nav class="breadcrumb" aria-label="Emplacement">' + iconSvg("i-folder") + ' <span>Espaces partagés</span> ' + iconSvg("i-chevron-right", "bc-sep") + " <span>" + s.name + "</span> " + iconSvg("i-chevron-right", "bc-sep") + ' <span class="bc-current">Documents</span> <span class="badge badge-sync">' + iconSvg("i-layers") + ' Synchronisé avec le Drive partagé</span></nav>' +
+      '<div class="files-toolbar"><nav class="breadcrumb" aria-label="Emplacement">' + iconSvg("i-folder") + ' <span class="bc-link" data-noop>Espaces partagés</span> ' + iconSvg("i-chevron-right", "bc-sep") + ' <span class="bc-link" data-noop>' + s.name + "</span> " + iconSvg("i-chevron-right", "bc-sep") + ' <span class="bc-current">Documents</span> <span class="badge badge-sync">' + iconSvg("i-layers") + ' Synchronisé avec le Drive partagé</span></nav>' +
       '<div class="files-toolbar-actions"><button class="btn btn-secondary" data-fileaction="Import de fichiers">' + iconSvg("i-download") + ' Importer</button><button class="btn btn-primary" data-fileaction="Nouveau document">' + iconSvg("i-plus") + " Nouveau</button></div></div>" +
       '<div class="files-layout">' + nav + '<div class="files-main">' +
       '<div class="files-search"><div class="search search--inline">' + iconSvg("i-search", "search-icon") + '<input class="search-input" type="search" placeholder="Recherche plein texte dans les documents…" aria-label="Recherche plein texte" data-input="files-search"></div><span class="ai-tag">' + iconSvg("i-sparkles") + ' Recherche plein texte IA</span></div>' +
@@ -1163,12 +1188,12 @@
     return '<div class="panel-inner mail"><div class="files-layout">' + nav + '<div class="files-main"><div class="section-head"><h3 class="section-title">Réception — Mail de l\'espace</h3><span class="badge badge-sync">Vue filtrée sur l\'espace</span></div><ul class="mail-list" data-searchable-list>' + rows + '</ul></div></div></div>';
   }
   function renderChat(s) {
-    const channels = s.channels.map((c) => '<button class="channel' + (c.active ? " is-active" : "") + '" data-channel="' + c.name + '"># ' + c.name + (c.n ? ' <span class="channel-badge' + (c.alert ? " channel-badge--alert" : "") + '">' + c.n + '</span>' : "") + '</button>').join("");
+    const channels = s.channels.map((c) => '<button class="channel' + (c.active ? " is-active" : "") + '" data-channel="' + c.name + '" data-chan-name="' + c.name + '"># ' + c.name + (c.n ? ' <span class="channel-badge' + (c.alert ? " channel-badge--alert" : "") + '">' + c.n + '</span>' : "") + '</button>').join("");
     const first = s.channels[0] ? s.channels[0].name : "général";
     const msgs = s.messages.map((m) =>
       '<div class="msg">' + avaSvg(m.i, m.c, m.who) + '<div class="msg-body"><p class="msg-head"><span class="msg-name">' + m.who + '</span> ' + (m.role ? '<span class="badge badge-role">' + m.role + '</span> ' : "") + '<span class="msg-time">' + m.time + '</span></p><div class="bubble">' + m.text + '</div>' + (m.card ? '<article class="ocard ocard--inchat' + (m.card.kind === "event" ? " ocard--event" : "") + '">' + ocardHtml(m.card).replace(/^<article class="ocard[^"]*">/, "") : "") + '</div></div>'
     ).join("");
-    return '<div class="chat"><div class="channels" aria-label="Canaux"><p class="nav-section">Canaux</p>' + channels + '</div><div class="thread"><div class="thread-head"><div class="thread-head-text"><h3 class="thread-title"># ' + first + '</h3><span class="muted small">Canal de l\'espace ' + s.name + ' · ' + s.members + ' membres</span></div><div class="thread-actions"><button class="icon-btn" data-action="channel-call" aria-label="Appel audio du canal" title="Appel audio">' + iconSvg("i-phone") + '</button><button class="icon-btn" data-action="channel-video" aria-label="Visio du canal" title="Twake Visio Meeting">' + iconSvg("i-video") + '</button></div></div><div class="messages" data-messages>' + msgs + '</div><form class="composer" data-composer><button type="button" class="icon-btn" data-action="link-object" aria-label="Lier un objet"><svg class="icon"><use href="#i-paperclip"></use></svg></button><input class="composer-input" type="text" placeholder="Envoyer un message à #' + first + '…" aria-label="Votre message" data-input="message"><button type="button" class="icon-btn" data-noop aria-label="Emoji"><svg class="icon"><use href="#i-smile"></use></svg></button><button type="submit" class="btn btn-primary composer-send" data-action="send" aria-label="Envoyer"><svg class="icon"><use href="#i-send"></use></svg></button></form></div></div>';
+    return '<div class="chat"><div class="channels" aria-label="Canaux"><div class="channels-search">' + iconSvg("i-search", "search-icon") + '<input class="channels-search-input" type="search" placeholder="Rechercher un canal…" aria-label="Rechercher un canal" data-input="channel-search"></div><div class="channels-head"><p class="nav-section">Canaux</p><button class="icon-btn channels-add" data-action="add-channel" aria-label="Créer un canal ou une discussion" title="Créer un canal">' + iconSvg("i-plus") + '</button></div><div class="channels-list" data-channels-list>' + channels + '</div></div><div class="thread"><div class="thread-head"><div class="thread-head-text"><h3 class="thread-title"># ' + first + '</h3><span class="muted small">Canal de l\'espace ' + s.name + ' · ' + s.members + ' membres</span></div><div class="thread-actions"><button class="icon-btn" data-action="channel-call" aria-label="Appel audio du canal" title="Appel audio">' + iconSvg("i-phone") + '</button><button class="icon-btn" data-action="channel-video" aria-label="Visio du canal" title="Twake Visio Meeting">' + iconSvg("i-video") + '</button></div></div><div class="messages" data-messages>' + msgs + '</div><form class="composer" data-composer><button type="button" class="icon-btn" data-action="link-object" aria-label="Lier un objet"><svg class="icon"><use href="#i-paperclip"></use></svg></button><input class="composer-input" type="text" placeholder="Envoyer un message à #' + first + '…" aria-label="Votre message" data-input="message"><button type="button" class="icon-btn" data-noop aria-label="Emoji"><svg class="icon"><use href="#i-smile"></use></svg></button><button type="submit" class="btn btn-primary composer-send" data-action="send" aria-label="Envoyer"><svg class="icon"><use href="#i-send"></use></svg></button></form></div></div>';
   }
   function renderMembers(s) {
     return s.membersList.map((m) => {
@@ -1292,7 +1317,7 @@
   }
 
   const DRIVE_RECENT = [
-    { name: "Cahier des charges B2B v3.pdf", ico: "pdf", by: "Camille L.", bi: "CL", bc: "blue", space: "B2B Admin Panel", date: "11 juin", status: [{ t: "version", x: "v3" }, { t: "warn", x: "Diffusion restreinte" }] },
+    { name: "Cahier des charges Workplace v3.pdf", ico: "pdf", by: "Camille L.", bi: "CL", bc: "blue", space: "Workplace Souveraine", date: "11 juin", status: [{ t: "version", x: "v3" }, { t: "warn", x: "Diffusion restreinte" }] },
     { name: "Schéma cible architecture cloud.pdf", ico: "pdf", by: "Hugo P.", bi: "HP", bc: "green", space: "Modernisation du SI", date: "13 juin", status: [{ t: "version", x: "v2" }] },
     { name: "Catalogue matériel 2026.pdf", ico: "pdf", by: "Lucas B.", bi: "LB", bc: "amber", space: "Équipements utilisateurs", date: "11 juin", status: [{ t: "ai", x: "Rangé par IA" }] },
     { name: "Rapport de test d'intrusion.pdf", ico: "pdf", by: "Nadia E.", bi: "NE", bc: "indigo", space: "Cybersécurité", date: "11 juin", status: [{ t: "lock", x: "Verrouillé" }] },
@@ -1308,7 +1333,7 @@
       return '<button class="drive-folder" data-space-card="' + key + '" aria-label="Ouvrir les fichiers de ' + s.name + '"><span class="drive-folder-ico drive-folder-ico--' + s.tint + '">' + iconSvg("i-folder") + '</span><span><span class="drive-folder-name">' + s.name + '</span><span class="drive-folder-sub">' + n + ' documents</span></span></button>';
     }).join("");
     const rows = DRIVE_RECENT.map((f) =>
-      '<li class="file-wrap"><div class="files-row" role="row"><span class="file-name" role="cell">' + iconSvg("i-doc", "file-ico file-ico--" + f.ico) + '<span>' + f.name + '<span class="file-sub">' + f.space + '</span></span></span><span class="file-owner" role="cell">' + avaSvg(f.bi, f.bc, f.by, true) + " " + f.by + '</span><span role="cell" class="file-status">' + driveStatus(f.status) + '</span><span role="cell" class="muted">' + f.date + '</span><span class="col-end" role="cell"><button class="icon-btn" data-noop aria-label="Télécharger ' + f.name + '">' + iconSvg("i-download") + '</button></span></div></li>'
+      '<li class="file-wrap"><div class="files-row" role="row"><span class="file-name" role="cell">' + iconSvg("i-doc", "file-ico file-ico--" + f.ico) + '<span>' + f.name + '<span class="file-sub">' + f.space + '</span></span></span><span class="file-owner" role="cell" title="' + f.by + '">' + avaSvg(f.bi, f.bc, f.by, true) + '</span><span role="cell" class="file-status">' + driveStatus(f.status) + '</span><span role="cell" class="muted">' + f.date + '</span><span class="col-end" role="cell"><button class="icon-btn" data-noop aria-label="Télécharger ' + f.name + '">' + iconSvg("i-download") + '</button></span></div></li>'
     ).join("");
     driveInner.innerHTML =
       '<div class="section-head"><h2 class="section-title">Drive partagé</h2><span class="muted">Tous les fichiers des espaces dans un espace de stockage unique (ECS souverain).</span></div>' +
@@ -1368,5 +1393,5 @@
      ------------------------------------------------------------------------ */
   recomputeTasks();
   refreshBadge(false);
-  announce("Espace B2B Admin Panel chargé");
+  announce("Espace Workplace Souveraine chargé");
 })();

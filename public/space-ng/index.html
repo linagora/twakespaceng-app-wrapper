@@ -37,7 +37,7 @@
   E10 Cycle de vie / archivage ....... Menu « … » → Archiver : bandeau, lecture
                                        seule, conservation, bouton Réactiver
   E11 Stockage partagé ............... Fichiers : chemin « Espaces partagés /
-                                       B2B Admin Panel / … » + « synchronisé Drive »
+                                       Workplace Souveraine / … » + « synchronisé Drive »
   E12 IA intégrée .................... Fichiers : classement auto (Rangé par IA),
                                        métadonnées enrichies + entités nommées,
                                        recherche plein texte, suggestion de
@@ -73,7 +73,7 @@
   <!-- Auto-test CSP : politique identique à la cible de production -->
   <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self'; object-src 'none'; base-uri 'self'">
   <meta name="color-scheme" content="light">
-  <title>Twake Space — B2B Admin Panel</title>
+  <title>Twake Space — Workplace Souveraine</title>
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
@@ -132,6 +132,9 @@
       <symbol id="i-home" viewBox="0 0 24 24"><path d="M3 10.5L12 3l9 7.5"/><path d="M5 9.5V20a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V9.5"/><path d="M9 21v-6h6v6"/></symbol>
       <symbol id="i-edit" viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4z"/></symbol>
       <symbol id="i-trash" viewBox="0 0 24 24"><path d="M3 6h18M8 6V4a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v2M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></symbol>
+      <symbol id="i-info" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></symbol>
+      <symbol id="i-arrow-up" viewBox="0 0 24 24"><path d="M12 19V5M5 12l7-7 7 7"/></symbol>
+      <symbol id="i-pen" viewBox="0 0 24 24"><path d="M12 19l7-7 3 3-7 7-3-3z"/><path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z"/><path d="M2 2l7.586 7.586"/><circle cx="11" cy="11" r="2"/></symbol>
       <symbol id="i-logout" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></symbol>
       <symbol id="i-globe-fr" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></symbol>
     </defs>
@@ -207,7 +210,6 @@
         <h1 class="sidebar-title">Project</h1>
         <div class="sidebar-head-actions">
           <button class="icon-btn" data-noop aria-label="Filtrer les espaces" title="Filtrer"><svg class="icon"><use href="#i-filter"></use></svg></button>
-          <button class="icon-btn" data-open="create-space" aria-label="Créer un espace" title="Créer un espace"><svg class="icon"><use href="#i-plus"></use></svg></button>
         </div>
       </header>
 
@@ -223,7 +225,7 @@
           <li>
             <button class="nav-space is-active" data-space="b2b">
               <span class="space-mini space-mini--grad" aria-hidden="true"></span>
-              <span class="nav-space-name">B2B Admin Panel</span>
+              <span class="nav-space-name">Workplace Souveraine</span>
               <svg class="icon nav-pin"><use href="#i-pin-tack"></use></svg>
             </button>
           </li>
@@ -278,7 +280,7 @@
             </svg>
           </span>
           <div class="space-id-text">
-            <h2 class="space-name">B2B Admin Panel</h2>
+            <h2 class="space-name">Workplace Souveraine</h2>
             <p class="space-sub"><span class="dot-live" aria-hidden="true"></span> Espace partagé · 7 membres</p>
           </div>
         </div>
@@ -343,8 +345,8 @@
           <div class="panel-inner home">
             <div class="home-hero">
               <span class="home-type">Projet</span>
-              <h3 class="home-title">Bienvenue dans B2B Admin Panel</h3>
-              <p class="home-desc">Refonte et administration du portail d'administration B2B (comptes clients, droits et facturation). Cet espace regroupe le fil d'activité, les discussions, les fichiers, les tâches et l'agenda de l'équipe.</p>
+              <h3 class="home-title">Bienvenue dans Workplace Souveraine</h3>
+              <p class="home-desc">Conception et déploiement du Workplace souverain de l'organisation : collaboration, fichiers, tâches et visio dans un ECS de confiance. Cet espace regroupe le fil d'activité, les discussions, les fichiers, les tâches et l'agenda de l'équipe.</p>
             </div>
 
             <div class="home-stats">
@@ -366,7 +368,7 @@
               </section>
               <section class="home-card">
                 <h4 class="home-card-title">À propos de cet espace</h4>
-                <p class="home-about">Espace de travail dédié au projet B2B Admin Panel. Tout le contenu est conservé dans l'ECS souverain et synchronisé avec le Drive partagé.</p>
+                <p class="home-about">Espace de travail dédié au projet Workplace Souveraine. Tout le contenu est conservé dans l'ECS souverain et synchronisé avec le Drive partagé.</p>
                 <ul class="home-about-list">
                   <li><svg class="icon"><use href="#i-folder"></use></svg> 5 documents partagés, synchronisés avec le Drive.</li>
                   <li><svg class="icon"><use href="#i-check-square"></use></svg> 6 tâches suivies, 2 terminées.</li>
@@ -416,7 +418,7 @@
                     <span class="ocard-accent" aria-hidden="true"></span>
                     <span class="ocard-ico" aria-hidden="true"><svg class="icon"><use href="#i-doc"></use></svg></span>
                     <div class="ocard-main">
-                      <h4 class="ocard-title">Cahier des charges B2B v3.pdf</h4>
+                      <h4 class="ocard-title">Cahier des charges Workplace v3.pdf</h4>
                       <p class="ocard-meta"><span class="badge badge-version"><svg class="icon"><use href="#i-layers"></use></svg> v3</span> <span class="badge badge-warn"><svg class="icon"><use href="#i-globe"></use></svg> Diffusion externe restreinte</span></p>
                     </div>
                     <button class="icon-btn ocard-more" data-noop aria-label="Options"><svg class="icon"><use href="#i-more-h"></use></svg></button>
@@ -497,12 +499,21 @@
           <div class="chat">
             <!-- Liste des canaux propres à l'espace -->
             <div class="channels" aria-label="Canaux">
-              <p class="nav-section">Canaux</p>
-              <button class="channel is-active" data-channel="general"># général <span class="channel-badge">3</span></button>
-              <button class="channel" data-channel="projet"># projet-b2b</button>
-              <button class="channel" data-channel="design"># design</button>
-              <button class="channel" data-channel="incidents"># incidents <span class="channel-badge channel-badge--alert">2</span></button>
-              <button class="channel" data-channel="externe"># partenaires-externes</button>
+              <div class="channels-search">
+                <svg class="icon search-icon"><use href="#i-search"></use></svg>
+                <input class="channels-search-input" type="search" placeholder="Rechercher un canal…" aria-label="Rechercher un canal" data-input="channel-search">
+              </div>
+              <div class="channels-head">
+                <p class="nav-section">Canaux</p>
+                <button class="icon-btn channels-add" data-action="add-channel" aria-label="Créer un canal ou une discussion" title="Créer un canal"><svg class="icon"><use href="#i-plus"></use></svg></button>
+              </div>
+              <div class="channels-list" data-channels-list>
+                <button class="channel is-active" data-channel="general" data-chan-name="général"># général <span class="channel-badge">3</span></button>
+                <button class="channel" data-channel="projet" data-chan-name="projet-workplace"># projet-workplace</button>
+                <button class="channel" data-channel="design" data-chan-name="design"># design</button>
+                <button class="channel" data-channel="incidents" data-chan-name="incidents"># incidents <span class="channel-badge channel-badge--alert">2</span></button>
+                <button class="channel" data-channel="externe" data-chan-name="partenaires-externes"># partenaires-externes</button>
+              </div>
               <p class="nav-section">Messages directs</p>
               <button class="channel channel--dm" data-noop><svg class="avatar avatar--teal avatar-xs" viewBox="0 0 40 40" role="img" aria-label="Thomas Moreau"><circle class="avatar-bg" cx="20" cy="20" r="20"/><text class="avatar-initials" x="20" y="21">TM</text></svg> Thomas Moreau</button>
               <button class="channel channel--dm" data-noop><svg class="avatar avatar--violet avatar-xs" viewBox="0 0 40 40" role="img" aria-label="Sophie Dubois"><circle class="avatar-bg" cx="20" cy="20" r="20"/><text class="avatar-initials" x="20" y="21">SD</text></svg> Sophie Dubois</button>
@@ -513,7 +524,7 @@
               <div class="thread-head">
                 <div class="thread-head-text">
                   <h3 class="thread-title"># général</h3>
-                  <span class="muted small">Canal de l'espace B2B Admin Panel · 7 membres</span>
+                  <span class="muted small">Canal de l'espace Workplace Souveraine · 7 membres</span>
                 </div>
                 <!-- Appel/visio par canal (C7) -->
                 <div class="thread-actions">
@@ -528,7 +539,7 @@
                   <svg class="avatar avatar--blue" viewBox="0 0 40 40" role="img" aria-label="Camille Laurent"><circle class="avatar-bg" cx="20" cy="20" r="20"/><text class="avatar-initials" x="20" y="21">CL</text></svg>
                   <div class="msg-body">
                     <p class="msg-head"><span class="msg-name">Camille Laurent</span> <span class="badge badge-role">Owner</span> <span class="msg-time">09:24</span></p>
-                    <div class="bubble">Bonjour à tous 👋 On démarre le sprint d'intégration B2B aujourd'hui. <span class="mention">@Thomas Moreau</span> peux-tu prendre le sujet SSO&nbsp;?</div>
+                    <div class="bubble">Bonjour à tous 👋 On démarre le sprint d'intégration du Workplace aujourd'hui. <span class="mention">@Thomas Moreau</span> peux-tu prendre le sujet SSO&nbsp;?</div>
                     <div class="reactions">
                       <button class="reaction" data-reaction aria-label="Réagir 👍"><span class="reaction-emoji">👍</span> <span class="reaction-count">3</span></button>
                       <button class="reaction" data-reaction aria-label="Réagir 🚀"><span class="reaction-emoji">🚀</span> <span class="reaction-count">2</span></button>
@@ -615,8 +626,8 @@
             <div class="files-toolbar">
               <nav class="breadcrumb" aria-label="Emplacement">
                 <svg class="icon"><use href="#i-folder"></use></svg>
-                <span>Espaces partagés</span> <svg class="icon bc-sep"><use href="#i-chevron-right"></use></svg>
-                <span>B2B Admin Panel</span> <svg class="icon bc-sep"><use href="#i-chevron-right"></use></svg>
+                <span class="bc-link" data-noop>Espaces partagés</span> <svg class="icon bc-sep"><use href="#i-chevron-right"></use></svg>
+                <span class="bc-link" data-noop>Workplace Souveraine</span> <svg class="icon bc-sep"><use href="#i-chevron-right"></use></svg>
                 <span class="bc-current">Documents</span>
                 <span class="badge badge-sync"><svg class="icon"><use href="#i-layers"></use></svg> Synchronisé avec le Drive partagé</span>
               </nav>
@@ -629,7 +640,10 @@
             <div class="files-layout">
               <!-- Arborescence de dossiers (C5) -->
               <aside class="files-nav" aria-label="Dossiers">
-                <p class="files-nav-label">Dossiers</p>
+                <div class="files-nav-head">
+                  <p class="files-nav-label">Dossiers</p>
+                  <button class="icon-btn files-up" data-action="folder-up" title="Remonter d'un niveau" aria-label="Remonter d'un niveau"><svg class="icon"><use href="#i-arrow-up"></use></svg></button>
+                </div>
                 <button class="files-folder is-active" data-folder><svg class="icon"><use href="#i-folder"></use></svg> Documents <span class="files-folder-count">5</span></button>
                 <button class="files-folder" data-folder><svg class="icon"><use href="#i-folder"></use></svg> Livrables</button>
                 <button class="files-folder" data-folder><svg class="icon"><use href="#i-folder"></use></svg> Contrats</button>
@@ -654,7 +668,7 @@
               <span class="ai-suggest-ico" aria-hidden="true"><svg class="icon"><use href="#i-sparkles"></use></svg></span>
               <div class="ai-suggest-body">
                 <p class="ai-suggest-title">L'IA suggère de regrouper 3 documents</p>
-                <p class="ai-suggest-text">« Cahier des charges B2B », « Specs techniques API » et « Maquettes UI » partagent la thématique <em>Conception B2B</em>.</p>
+                <p class="ai-suggest-text">« Cahier des charges Workplace », « Specs techniques API » et « Maquettes UI » partagent la thématique <em>Conception Workplace</em>.</p>
               </div>
               <div class="ai-suggest-actions">
                 <button class="btn btn-primary btn-sm" data-action="ai-group-apply">Regrouper</button>
@@ -674,23 +688,23 @@
 
               <ul class="files-body" data-searchable-list>
                 <!-- Document détaillé (E4 versions / E12 métadonnées + entités) -->
-                <li class="file-wrap" data-searchable="cahier des charges b2b pdf camille laurent rgpd keycloak conception">
+                <li class="file-wrap" data-searchable="cahier des charges workplace pdf camille laurent rgpd keycloak conception">
                   <div class="files-row" role="row">
                     <span class="file-name" role="cell">
                       <svg class="icon file-ico file-ico--pdf"><use href="#i-doc"></use></svg>
                       <span>
-                        Cahier des charges B2B v3.pdf
+                        Cahier des charges Workplace v3.pdf
                         <span class="file-badges">
                           <span class="badge badge-version" data-open="versions"><svg class="icon"><use href="#i-layers"></use></svg> v3</span>
                           <span class="badge badge-ai"><svg class="icon"><use href="#i-sparkles"></use></svg> Rangé par IA</span>
                         </span>
                       </span>
                     </span>
-                    <span class="file-owner" role="cell"><svg class="avatar avatar--blue avatar-xs" viewBox="0 0 40 40" role="img" aria-label="Camille Laurent"><circle class="avatar-bg" cx="20" cy="20" r="20"/><text class="avatar-initials" x="20" y="21">CL</text></svg> Camille L.</span>
-                    <span class="file-status" role="cell"><span class="badge badge-warn"><svg class="icon"><use href="#i-globe"></use></svg> Diffusion externe restreinte</span></span>
+                    <span class="file-owner" role="cell" title="Camille Laurent"><svg class="avatar avatar--blue avatar-xs" viewBox="0 0 40 40" role="img" aria-label="Camille Laurent"><circle class="avatar-bg" cx="20" cy="20" r="20"/><text class="avatar-initials" x="20" y="21">CL</text></svg></span>
+                    <span class="file-status" role="cell"><span class="file-status-ico fs-restricted" title="Diffusion externe restreinte" aria-label="Statut : Diffusion externe restreinte"><svg class="icon"><use href="#i-globe"></use></svg></span></span>
                     <span role="cell" class="muted">11 juin</span>
                     <span class="col-end file-actions" role="cell">
-                      <button class="icon-btn" data-row-menu aria-label="Actions sur Cahier des charges B2B v3.pdf" aria-haspopup="true"><svg class="icon"><use href="#i-more-h"></use></svg></button>
+                      <button class="icon-btn" data-row-menu aria-label="Actions sur Cahier des charges Workplace v3.pdf" aria-haspopup="true"><svg class="icon"><use href="#i-more-h"></use></svg></button>
                       <div class="dropdown file-menu" role="menu" hidden>
                         <button class="dropdown-item" role="menuitem" data-fileaction="Renommer"><svg class="icon"><use href="#i-edit"></use></svg> Renommer</button>
                         <button class="dropdown-item" role="menuitem" data-fileaction="Partage"><svg class="icon"><use href="#i-share"></use></svg> Partager</button>
@@ -713,12 +727,12 @@
                         <p class="meta-label">Date</p><p class="meta-value">11 juin 2026</p>
                       </div>
                       <div class="meta-block">
-                        <p class="meta-label">Thématique <span class="ai-mini">IA</span></p><p class="meta-value">Conception B2B · Cadrage</p>
+                        <p class="meta-label">Thématique <span class="ai-mini">IA</span></p><p class="meta-value">Conception Workplace · Cadrage</p>
                       </div>
                       <div class="meta-block meta-block--wide">
                         <p class="meta-label">Entités nommées <span class="ai-mini">IA</span></p>
                         <p class="meta-value entities">
-                          <span class="entity">Keycloak</span><span class="entity">RGPD</span><span class="entity">SSO</span><span class="entity">Camille Laurent</span><span class="entity">B2B Admin Panel</span>
+                          <span class="entity">Keycloak</span><span class="entity">RGPD</span><span class="entity">SSO</span><span class="entity">Camille Laurent</span><span class="entity">Workplace Souveraine</span>
                         </p>
                       </div>
                     </div>
@@ -741,8 +755,8 @@
                       <svg class="icon file-ico file-ico--xls"><use href="#i-doc"></use></svg>
                       <span>Budget prévisionnel 2026.xlsx</span>
                     </span>
-                    <span class="file-owner" role="cell"><svg class="avatar avatar--primary avatar-xs" viewBox="0 0 40 40" role="img" aria-label="Marc Lefèvre"><circle class="avatar-bg" cx="20" cy="20" r="20"/><text class="avatar-initials" x="20" y="21">ML</text></svg> Marc L.</span>
-                    <span class="file-status" role="cell"><span class="badge badge-lock"><svg class="icon"><use href="#i-lock"></use></svg> Modification verrouillée</span></span>
+                    <span class="file-owner" role="cell" title="Marc Lefèvre"><svg class="avatar avatar--primary avatar-xs" viewBox="0 0 40 40" role="img" aria-label="Marc Lefèvre"><circle class="avatar-bg" cx="20" cy="20" r="20"/><text class="avatar-initials" x="20" y="21">ML</text></svg></span>
+                    <span class="file-status" role="cell"><span class="file-status-ico fs-locked" title="Modification verrouillée" aria-label="Statut : Modification verrouillée"><svg class="icon"><use href="#i-lock"></use></svg></span></span>
                     <span role="cell" class="muted">10 juin</span>
                     <span class="col-end file-actions" role="cell">
                       <button class="icon-btn" data-row-menu aria-label="Actions sur Budget prévisionnel 2026.xlsx" aria-haspopup="true"><svg class="icon"><use href="#i-more-h"></use></svg></button>
@@ -767,8 +781,8 @@
                         <span class="file-badges"><span class="badge badge-version"><svg class="icon"><use href="#i-layers"></use></svg> v5</span> <span class="badge badge-ai"><svg class="icon"><use href="#i-sparkles"></use></svg> Rangé par IA</span></span>
                       </span>
                     </span>
-                    <span class="file-owner" role="cell"><svg class="avatar avatar--teal avatar-xs" viewBox="0 0 40 40" role="img" aria-label="Thomas Moreau"><circle class="avatar-bg" cx="20" cy="20" r="20"/><text class="avatar-initials" x="20" y="21">TM</text></svg> Thomas M.</span>
-                    <span class="file-status" role="cell"><span class="status-ok"><svg class="icon"><use href="#i-check"></use></svg> À jour</span></span>
+                    <span class="file-owner" role="cell" title="Thomas Moreau"><svg class="avatar avatar--teal avatar-xs" viewBox="0 0 40 40" role="img" aria-label="Thomas Moreau"><circle class="avatar-bg" cx="20" cy="20" r="20"/><text class="avatar-initials" x="20" y="21">TM</text></svg></span>
+                    <span class="file-status" role="cell"><span class="file-status-ico fs-signed" title="Signé" aria-label="Statut : Signé"><svg class="icon"><use href="#i-check"></use></svg></span></span>
                     <span role="cell" class="muted">9 juin</span>
                     <span class="col-end file-actions" role="cell">
                       <button class="icon-btn" data-row-menu aria-label="Actions sur Specs techniques API.docx" aria-haspopup="true"><svg class="icon"><use href="#i-more-h"></use></svg></button>
@@ -793,8 +807,8 @@
                         <span class="file-badges"><span class="badge badge-ai"><svg class="icon"><use href="#i-sparkles"></use></svg> Rangé par IA</span></span>
                       </span>
                     </span>
-                    <span class="file-owner" role="cell"><svg class="avatar avatar--green avatar-xs" viewBox="0 0 40 40" role="img" aria-label="Léa Rousseau"><circle class="avatar-bg" cx="20" cy="20" r="20"/><text class="avatar-initials" x="20" y="21">LR</text></svg> Léa R.</span>
-                    <span class="file-status" role="cell"><span class="status-ok"><svg class="icon"><use href="#i-check"></use></svg> À jour</span></span>
+                    <span class="file-owner" role="cell" title="Léa Rousseau"><svg class="avatar avatar--green avatar-xs" viewBox="0 0 40 40" role="img" aria-label="Léa Rousseau"><circle class="avatar-bg" cx="20" cy="20" r="20"/><text class="avatar-initials" x="20" y="21">LR</text></svg></span>
+                    <span class="file-status" role="cell"></span>
                     <span role="cell" class="muted">8 juin</span>
                     <span class="col-end file-actions" role="cell">
                       <button class="icon-btn" data-row-menu aria-label="Actions sur Maquettes UI.fig" aria-haspopup="true"><svg class="icon"><use href="#i-more-h"></use></svg></button>
@@ -817,8 +831,8 @@
                       <svg class="icon file-ico file-ico--pdf"><use href="#i-doc"></use></svg>
                       <span>Compte-rendu COPIL.pdf</span>
                     </span>
-                    <span class="file-owner" role="cell"><svg class="avatar avatar--violet avatar-xs" viewBox="0 0 40 40" role="img" aria-label="Sophie Dubois"><circle class="avatar-bg" cx="20" cy="20" r="20"/><text class="avatar-initials" x="20" y="21">SD</text></svg> Sophie D.</span>
-                    <span class="file-status" role="cell"><span class="status-ok"><svg class="icon"><use href="#i-check"></use></svg> À jour</span></span>
+                    <span class="file-owner" role="cell" title="Sophie Dubois"><svg class="avatar avatar--violet avatar-xs" viewBox="0 0 40 40" role="img" aria-label="Sophie Dubois"><circle class="avatar-bg" cx="20" cy="20" r="20"/><text class="avatar-initials" x="20" y="21">SD</text></svg></span>
+                    <span class="file-status" role="cell"><span class="file-status-ico fs-tosign" title="À signer" aria-label="Statut : À signer"><svg class="icon"><use href="#i-pen"></use></svg></span></span>
                     <span role="cell" class="muted">5 juin</span>
                     <span class="col-end file-actions" role="cell">
                       <button class="icon-btn" data-row-menu aria-label="Actions sur Compte-rendu COPIL.pdf" aria-haspopup="true"><svg class="icon"><use href="#i-more-h"></use></svg></button>
@@ -990,11 +1004,11 @@
             <div class="agenda-day">
               <p class="agenda-date"><span class="agenda-dnum">20</span> <span class="agenda-dlabel">Vendredi</span></p>
               <div class="agenda-events" data-searchable-list>
-                <article class="ocard ocard--event" data-searchable="démo client b2b conference room b">
+                <article class="ocard ocard--event" data-searchable="démo workplace souveraine conference room b">
                   <span class="ocard-accent" aria-hidden="true"></span>
                   <div class="ocard-date" aria-hidden="true"><span class="ocard-day">20</span><span class="ocard-mon">JUIN</span></div>
                   <div class="ocard-main">
-                    <h4 class="ocard-title">Démo client B2B</h4>
+                    <h4 class="ocard-title">Démo Workplace Souveraine</h4>
                     <p class="ocard-meta"><svg class="icon"><use href="#i-clock"></use></svg> 15:00 – 16:00 · <svg class="icon"><use href="#i-pin"></use></svg> Conference Room B</p>
                   </div>
                 </article>
@@ -1023,10 +1037,10 @@
                   <span class="badge badge-sync">Vue filtrée sur l'espace</span>
                 </div>
                 <ul class="mail-list" data-searchable-list>
-              <li class="mail-row mail-row--unread" data-searchable="appel d'offres b2b client direction">
+              <li class="mail-row mail-row--unread" data-searchable="appel d'offres workplace direction projet">
                 <svg class="avatar avatar--blue avatar-xs" viewBox="0 0 40 40" role="img" aria-label="Direction Client"><circle class="avatar-bg" cx="20" cy="20" r="20"/><text class="avatar-initials" x="20" y="21">DC</text></svg>
                 <div class="mail-main">
-                  <p class="mail-from">Direction Client B2B</p>
+                  <p class="mail-from">Direction de projet</p>
                   <p class="mail-subject">Retour sur le cahier des charges v3</p>
                   <p class="mail-preview muted">Bonjour, nous validons l'orientation proposée. Quelques remarques sur la partie sécurité…</p>
                 </div>
@@ -1096,7 +1110,7 @@
           <div class="ai-msg ai-msg--bot">
             <span class="ai-avatar" aria-hidden="true"><svg class="icon"><use href="#i-sparkles"></use></svg></span>
             <div class="ai-bubble">
-              Bonjour Camille 👋 Je suis l'assistant de l'espace <strong>B2B Admin Panel</strong>.
+              Bonjour Camille 👋 Je suis l'assistant de l'espace <strong>Workplace Souveraine</strong>.
               Je peux résumer l'activité, retrouver des documents, suivre les tâches ou rédiger un compte-rendu — à partir des données de l'espace, sans rien envoyer à l'extérieur.
             </div>
           </div>
@@ -1139,16 +1153,6 @@
         <span class="field-label">Nom de l'espace</span>
         <input class="input" type="text" placeholder="ex. Refonte portail client" data-input="new-space-name">
       </label>
-      <div class="field">
-        <span class="field-label">Type d'espace <span class="muted small">— préréglage des apps</span></span>
-        <div class="seg" role="group" aria-label="Type d'espace">
-          <button class="seg-btn is-active" data-seg data-preset="feed,chat,files,tasks,agenda,mail">Projet</button>
-          <button class="seg-btn" data-seg data-preset="feed,chat,files,tasks,mail">Service</button>
-          <button class="seg-btn" data-seg data-preset="feed,chat,files,tasks,agenda">Groupe de travail</button>
-          <button class="seg-btn" data-seg data-preset="feed,chat,files">Thématique</button>
-        </div>
-        <p class="field-note"><svg class="icon"><use href="#i-sparkles"></use></svg> Le type pré-sélectionne les apps adaptées ; tout reste ajustable ci-dessous.</p>
-      </div>
       <div class="field">
         <span class="field-label">Couleur de l'espace</span>
         <div class="swatches" role="group" aria-label="Couleur de l'espace">
@@ -1264,7 +1268,7 @@
           <option value="sofiane.brahimi@org.fr">Sofiane Brahimi — Juridique</option>
           <option value="contact@partenaire.com">Contact externe (partenaire)</option>
         </datalist>
-        <p class="field-note"><svg class="icon"><use href="#i-globe"></use></svg> L'autocomplétion propose vos contacts <strong>internes</strong> et l'<strong>annuaire de l'organisation</strong> ; vous pouvez aussi saisir un email <strong>externe</strong>.</p>
+        <p class="invite-note"><svg class="icon"><use href="#i-globe"></use></svg> <span class="invite-note-txt">Internes, annuaire de l'organisation, ou email externe.</span><button type="button" class="hint-btn" data-noop aria-label="En savoir plus sur l'invitation" title="L'autocomplétion propose vos contacts internes et l'annuaire de l'organisation. Vous pouvez aussi inviter une adresse email externe à l'organisation."><svg class="icon"><use href="#i-info"></use></svg></button></p>
       </div>
 
       <div class="members-list" data-members-list>
@@ -1305,7 +1309,10 @@
         </div>
       </div>
 
-      <!-- Niveau ESPACE : activer/désactiver les apps pour tous les membres (C3) -->
+      <!-- Niveau MEMBRE : droits Lecture/Écriture/Partage par app (rendu par app.js) — juste sous la liste (V2) -->
+      <div class="rights" data-member-rights></div>
+
+      <!-- Niveau ESPACE : activer/désactiver les apps pour tous les membres -->
       <div class="space-apps">
         <p class="field-label">Apps activées dans l'espace <span class="muted small">— pour tous les membres</span></p>
         <div class="space-apps-list">
@@ -1317,9 +1324,6 @@
           <div class="pref-row"><span><svg class="icon"><use href="#i-mail"></use></svg> Mail</span><button class="toggle is-on" data-toggle data-space-app="mail" aria-pressed="true" aria-label="Activer le Mail dans l'espace"></button></div>
         </div>
       </div>
-
-      <!-- Niveau MEMBRE : droits Lecture/Écriture/Partage par app (C3 — rendu par app.js) -->
-      <div class="rights" data-member-rights></div>
     </div>
   </aside>
 
