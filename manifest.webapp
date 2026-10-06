@@ -24,6 +24,21 @@
       "name": "Space",
       "short_description": "Démo Twake Space nouvelle génération",
       "long_description": "Maquette haute-fidélité d'un Espace Collaboratif Souverain (ECS) : fil, chat, fichiers, tâches, agenda, mail et IA sous une barre d'onglets unique. La maquette est embarquée dans l'application."
+    },
+    "es": {
+      "name": "Space",
+      "short_description": "Demo de Twake Space de nueva generación",
+      "long_description": "Una demo de alta fidelidad del Twake Space de nueva generación (Espacio Colaborativo Soberano): muro, chat, archivos, tareas, calendario, correo e IA en una única barra de pestañas. La demo está incluida en la aplicación."
+    },
+    "de": {
+      "name": "Space",
+      "short_description": "Demo von Twake Space der nächsten Generation",
+      "long_description": "Eine High-Fidelity-Demo des Twake Space der nächsten Generation (souveräner kollaborativer Arbeitsbereich): Feed, Chat, Dateien, Aufgaben, Kalender, E-Mail und KI in einer einzigen Tableiste. Die Demo ist in die Anwendung integriert."
+    },
+    "it": {
+      "name": "Space",
+      "short_description": "Demo di Twake Space di nuova generazione",
+      "long_description": "Una demo ad alta fedeltà del Twake Space di nuova generazione (Spazio Collaborativo Sovrano): bacheca, chat, file, attività, calendario, email e IA in un'unica barra delle schede. La demo è inclusa nell'applicazione."
     }
   },
   "routes": {
